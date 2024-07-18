@@ -12,6 +12,8 @@ config.js
 dist
 dist-ssrw
 *.local
+.env
+*.env
 
 # Editor directories and files
 .vscode/*

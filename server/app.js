@@ -1,19 +1,34 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { OAuth2Client } = require('google-auth-library');
-const { google } = require('googleapis');
 const multer = require('multer');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+const authRoutes = require('./routes/auth');
+const videoRoutes = require('./routes/video');
 const config = require('./config');
 const app = express();
 const PORT = 5000;
 
-// Connect to MongoDB
-mongoose.connect(config.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// const { OAuth2Client } = require('google-auth-library');
+// const { google } = require('googleapis');
+// const User = require('./models/User');
+// const Video = require('./models/Video');
+// const { sendEmailNotification } = require('./service/notificationService');
 
 // Middleware to parse JSON
 app.use(express.json());
+
+// Connect to MongoDB
+async function dbConnect() {
+  try {
+    await mongoose.connect(config.MONGO_URI);
+    console.log('Successfully connected to MongoDB Atlas!');
+  } catch (error) {
+    console.log('Unable to connect to MongoDB Atlas!');
+    console.log('error:', error);
+  }
+}
+dbConnect();
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -27,59 +42,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Google OAuth2 Client
-const oAuth2Client = new OAuth2Client(
-  config.CLIENT_ID,
-  config.CLIENT_SECRET,
-  config.REDIRECT_URI
-);
+// Use the routes
+app.use('/auth', authRoutes);
+app.use('/api', videoRoutes);
 
-// Route to initiate OAuth2 flow
-app.get('/auth', (req, res) => {
-  const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: config.SCOPES,
-  });
-  res.redirect(authUrl);
-});
+// Serve frontend
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-// OAuth2 callback route
-app.get('/oauth2callback', async (req, res) => {
-  const { code } = req.query;
-  const { tokens } = await oAuth2Client.getToken(code);
-  oAuth2Client.setCredentials(tokens);
-  // Save tokens to the database and handle further logic
-  res.send('Authentication successful! You can close this tab.');
-});
-
-// Video upload route
-app.post('/upload', upload.single('file'), async (req, res) => {
-  const { title, description } = req.body;
-  const filePath = req.file.path;
-  const youtube = google.youtube({ version: 'v3', auth: oAuth2Client });
-
-  const response = await youtube.videos.insert({
-    part: 'snippet,status',
-    requestBody: {
-      snippet: {
-        title,
-        description,
-        tags: ['tag1', 'tag2'],
-        categoryId: '22', // Education
-      },
-      status: {
-        privacyStatus: 'private',
-      },
-    },
-    media: {
-      body: fs.createReadStream(filePath),
-    },
-  });
-
-  // Clean up uploaded file after processing
-  fs.unlinkSync(filePath);
-
-  res.send(`Video uploaded. Video ID: ${response.data.id}`);
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 
 app.listen(PORT, () => {

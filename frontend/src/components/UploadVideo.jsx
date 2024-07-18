@@ -5,6 +5,7 @@ const UploadVideo = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -12,39 +13,49 @@ const UploadVideo = () => {
     formData.append('title', title);
     formData.append('description', description);
     formData.append('file', file);
+    formData.append('userId', 'your-user-id'); // Replace with actual user ID
+    formData.append('editorId', 'your-editor-id'); // Replace with actual editor ID
 
-    const response = await axios.post('http://localhost:5000/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-
-    console.log(response.data);
+    try {
+      const response = await axios.post('http://localhost:5000/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setMessage(response.data);
+    } catch (error) {
+      setMessage('Error uploading video');
+      console.error(error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4">
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-        className="block w-full mb-2 p-2 border"
-      />
-      <textarea
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        required
-        className="block w-full mb-2 p-2 border"
-      ></textarea>
-      <input
-        type="file"
-        onChange={(e) => setFile(e.target.files[0])}
-        required
-        className="block w-full mb-2 p-2"
-      />
-      <button type="submit" className="bg-blue-500 text-white p-2 rounded">Upload</button>
-    </form>
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Upload Video</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="block w-full p-2 border"
+        />
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          className="block w-full p-2 border"
+        ></textarea>
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          required
+          className="block w-full p-2"
+        />
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded">Upload</button>
+      </form>
+      {message && <p className="mt-4">{message}</p>}
+    </div>
   );
 };
 
