@@ -5,13 +5,17 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Editor'); // or 'YouTuber'
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/auth/register', { username, email, password, role });
+      const response = await axios.post('http://localhost:5000/auth/register', {
+        username,
+        email,
+        password,
+        role: 'Editor'
+      });
       setMessage('Registration successful');
     } catch (error) {
       setMessage('Registration failed');
@@ -47,10 +51,7 @@ const Register = () => {
           required
           className="block w-full p-2 border"
         />
-        <select value={role} onChange={(e) => setRole(e.target.value)} className="block w-full p-2 border">
-          <option value="Editor">Editor</option>
-          <option value="YouTuber">YouTuber</option>
-        </select>
+        
         <button type="submit" className="bg-blue-500 text-white p-2 rounded">Register</button>
       </form>
       {message && <p className="mt-4">{message}</p>}

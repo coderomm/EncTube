@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { generateAuthUrl, oauth2callback } = require('../controllers/authController');
 
@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
 });
 
 // OAuth for YouTubers
-router.get('/auth', generateAuthUrl);
+router.get('/youtuber', generateAuthUrl);
 router.get('/oauth2callback', oauth2callback);
 
 module.exports = router;

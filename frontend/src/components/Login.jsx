@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+// src/components/Login.jsx
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/auth/login', { email, password });
-      localStorage.setItem('token', response.data.token);
+      login(response.data.token);
       setMessage('Login successful');
     } catch (error) {
       setMessage('Login failed');

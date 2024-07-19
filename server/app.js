@@ -1,22 +1,12 @@
 const express = require('express');
+const cors = require("cors");
 const mongoose = require('mongoose');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const authRoutes = require('./routes/auth');
-const videoRoutes = require('./routes/video');
+// const authRoutes = require('./routes/auth');
+// const videoRoutes = require('./routes/video');
+const mainRouter = require("./routes/index");
 const config = require('./config');
 const app = express();
 const PORT = 5000;
-
-// const { OAuth2Client } = require('google-auth-library');
-// const { google } = require('googleapis');
-// const User = require('./models/User');
-// const Video = require('./models/Video');
-// const { sendEmailNotification } = require('./service/notificationService');
-
-// Middleware to parse JSON
-app.use(express.json());
 
 // Connect to MongoDB
 async function dbConnect() {
@@ -30,28 +20,20 @@ async function dbConnect() {
 }
 dbConnect();
 
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
+// Middleware to parse JSON
+app.use(express.json());
 
-const upload = multer({ storage });
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Replace with your frontend URL
+  credentials: true,
+}));  
 
 // Use the routes
-app.use('/auth', authRoutes);
-app.use('/api', videoRoutes);
+app.use('/api/v1', mainRouter);
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-});
+// app.use('/auth', authRoutes);
+// app.use('/api', videoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+// src/components/ApproveAction.jsx
+import React, { useEffect, useState, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const ApproveAction = () => {
   const [message, setMessage] = useState('');
   const location = useLocation();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);

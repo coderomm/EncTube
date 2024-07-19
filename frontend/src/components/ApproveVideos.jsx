@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const ApproveVideos = () => {
   const [videos, setVideos] = useState([]);
   const [message, setMessage] = useState('');
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchPendingVideos = async () => {

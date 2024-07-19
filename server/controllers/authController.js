@@ -1,16 +1,22 @@
-const { OAuth2Client } = require('google-auth-library');
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
+import { OAuth2Client } from 'google-auth-library';
 const config = require('../config');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-const oAuth2Client = new OAuth2Client(
-  config.CLIENT_ID,
-  config.CLIENT_SECRET,
-  config.REDIRECT_URI
+const OAUTH2_CLIENT_ID = config.CLIENT_ID;
+const OAUTH2_CLIENT_SECRET = config.CLIENT_SECRET;
+const OAUTH2_REDIRECT_URL = config.REDIRECT_URI;
+
+const oauth2Client = new OAuth2(
+  OAUTH2_CLIENT_ID,
+  OAUTH2_CLIENT_SECRET,
+  OAUTH2_REDIRECT_URL
 );
 
 exports.generateAuthUrl = (req, res) => {
-  const authUrl = oAuth2Client.generateAuthUrl({
+  const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: config.SCOPES,
   });
@@ -19,18 +25,19 @@ exports.generateAuthUrl = (req, res) => {
 
 exports.oauth2callback = async (req, res) => {
   const { code } = req.query;
-  const { tokens } = await oAuth2Client.getToken(code);
-  oAuth2Client.setCredentials(tokens);
-
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
   // Get user info
-  const response = await oAuth2Client.verifyIdToken({
+  const response = await oauth2Client.verifyIdToken({
     idToken: tokens.id_token,
     audience: config.CLIENT_ID,
   });
   const { email } = response.payload;
+  console.log(`tokens: ${tokens},tokens.id_token: ${tokens.id_token},response: ${response}`)
 
   // Save tokens and user info to the database
   let user = await User.findOne({ email });
+  console.log(`user: ${user}`)
   if (!user) {
     user = new User({
       email,
@@ -46,7 +53,7 @@ exports.oauth2callback = async (req, res) => {
 
   // Generate JWT token
   const jwtToken = jwt.sign({ userId: user._id, role: user.role }, config.JWT_SECRET);
-
+  console.log('jwtToken: ', jwtToken)
   // Send the JWT token to the client
-  res.redirect(`http://localhost:5000?token=${jwtToken}`);
+  res.redirect(`http://localhost:5173?token=${jwtToken}`);
 };
