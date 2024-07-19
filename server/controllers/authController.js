@@ -1,6 +1,5 @@
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
-import { OAuth2Client } from 'google-auth-library';
 const config = require('../config');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
@@ -18,7 +17,7 @@ const oauth2Client = new OAuth2(
 exports.generateAuthUrl = (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: config.SCOPES,
+    scope: ['https://www.googleapis.com/auth/youtube', 'openid', 'email', 'profile'],
   });
   res.redirect(authUrl);
 };
@@ -27,19 +26,24 @@ exports.oauth2callback = async (req, res) => {
   const { code } = req.query;
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
+  console.log(`tokens: ${tokens},tokens.id_token: ${tokens.id_token}`)
+  if (!tokens.id_token) {
+    throw new Error('Opps No ID token received');
+  }
   // Get user info
   const response = await oauth2Client.verifyIdToken({
     idToken: tokens.id_token,
-    audience: config.CLIENT_ID,
+    audience: OAUTH2_CLIENT_ID,
   });
   const { email } = response.payload;
-  console.log(`tokens: ${tokens},tokens.id_token: ${tokens.id_token},response: ${response}`)
 
   // Save tokens and user info to the database
   let user = await User.findOne({ email });
   console.log(`user: ${user}`)
   if (!user) {
     user = new User({
+      username: email,
+      password: `1234${email}`,
       email,
       role: 'YouTuber',
       accessToken: tokens.access_token,
@@ -49,6 +53,7 @@ exports.oauth2callback = async (req, res) => {
     user.accessToken = tokens.access_token;
     user.refreshToken = tokens.refresh_token;
   }
+  console.log(`user: ${user}`)
   await user.save();
 
   // Generate JWT token
