@@ -1,16 +1,15 @@
+// routes/video.js
 const express = require('express');
 const router = express.Router();
 const Video = require('../models/Video');
-const User = require('../models/User');
-const authenticate = require('../middleware/auth');
-const { sendEmailNotification } = require('../service/notificationService');
+const Youtuber = require('../models/Youtuber');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
 const config = require('../config');
 const oAuth2Client = new OAuth2Client(config.CLIENT_ID, config.CLIENT_SECRET, config.REDIRECT_URI);
 const fs = require('fs');
 const multer = require('multer');
 
-// Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -22,8 +21,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Fetch pending videos
-router.get('/videos/pending', authenticate, async (req, res) => {
+router.get('/videos/pending', authMiddleware, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }
@@ -36,8 +34,7 @@ router.get('/videos/pending', authenticate, async (req, res) => {
   }
 });
 
-// Approve or reject video
-router.put('/videos/:id', authenticate, async (req, res) => {
+router.put('/videos/:id', authMiddleware, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }
@@ -51,13 +48,12 @@ router.put('/videos/:id', authenticate, async (req, res) => {
     await video.save();
 
     if (video.status === 'Approved') {
-      const user = await User.findById(video.userId);
+      const youtuber = await Youtuber.findById(video.youtuberId);
       oAuth2Client.setCredentials({
-        access_token: user.accessToken,
-        refresh_token: user.refreshToken
+        access_token: youtuber.accessToken,
+        refresh_token: youtuber.refreshToken
       });
 
-      // Upload to YouTube
       const youtube = google.youtube({ version: 'v3', auth: oAuth2Client });
       const response = await youtube.videos.insert({
         part: 'snippet,status',
@@ -87,15 +83,13 @@ router.put('/videos/:id', authenticate, async (req, res) => {
   }
 });
 
-// Video upload route
-router.post('/upload', authenticate, upload.single('file'), async (req, res) => {
+router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   const { title, description, userId, editorId } = req.body;
   const filePath = req.file.path;
 
   try {
-    // Save video details to the database
     const video = new Video({
-      userId,
+      youtuberId: userId,  // Changed to youtuberId
       editorId,
       title,
       description,
@@ -105,21 +99,18 @@ router.post('/upload', authenticate, upload.single('file'), async (req, res) => 
     });
     await video.save();
 
-    // Fetch the YouTuber's email
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send('User not found');
+    const youtuber = await Youtuber.findById(userId);  // Use Youtuber model
+    if (!youtuber) {
+      return res.status(404).send('YouTuber not found');
     }
 
-    // Send email notification with action links
     await sendEmailNotification(
       'New Video Uploaded',
       `A new video titled "${title}" has been uploaded and is pending approval.`,
-      user.email, // Use the fetched email here
+      youtuber.email,
       video._id
     );
 
-    // Clean up uploaded file after processing
     fs.unlinkSync(filePath);
 
     res.send(`Video uploaded. Video ID: ${video._id}`);

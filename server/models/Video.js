@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const videoSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  editorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  youtuberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Youtuber', required: true },
+  editorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Editor' },
   title: { type: String, required: true },
   description: { type: String, required: true },
   filePath: { type: String, required: true },
