@@ -1,40 +1,16 @@
-// src/pages/Home.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const Home = () => {
-  const navigate = useNavigate();
-
-  const handleYouTuberLogin = () => {
-    window.location.href = 'http://localhost:5000/api/auth/youtuber'; // URL for YouTuber OAuth login
-  };
-
-  const handleEditorLogin = () => {
-    navigate('/editor-login');
-  };
-
+function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Welcome to YT Manager</h1>
-        <p className="mb-6">Manage your YouTube channel with ease</p>
-        <div className="flex space-x-4">
-          <button 
-            onClick={handleYouTuberLogin} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-          >
-            Login as YouTuber
-          </button>
-          <button 
-            onClick={handleEditorLogin} 
-            className="bg-green-500 text-white px-4 py-2 rounded-lg"
-          >
-            Login as Editor
-          </button>
-        </div>
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h2 className="text-2xl mb-4">Welcome to YouTube Uploader</h2>
+      <div className="flex">
+        <Link to="/login-youtuber" className="btn">YouTuber Login</Link>
+        <Link to="/login-editor" className="btn ml-4">Editor Login</Link>
       </div>
     </div>
   );
-};
+}
 
 export default Home;

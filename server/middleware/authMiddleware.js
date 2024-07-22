@@ -27,6 +27,26 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
+const authenticateYoutuber = (req, res, next) => {
+    const token = req.cookies.youtuberToken;
+
+    if (!token) {
+        return res.status(403).send('Access denied, Authorization token missing');
+    }
+
+    try {
+        const decoded = jwt.verify(token, config.JWT_SECRET);
+        if (decoded.role !== 'YouTuber') {
+            return res.status(403).send('Access denied, YouTuber role required');
+        }
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(403).send('Invalid token');
+    }
+};
+
 module.exports = {
-    authMiddleware
+    authMiddleware,
+    authenticateYoutuber
 };

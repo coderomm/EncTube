@@ -7,6 +7,7 @@ const OAuth2 = google.auth.OAuth2;
 const config = require('../config');
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
+const { authenticateYoutuber } = require('../middleware/authMiddleware');
 
 const OAUTH2_CLIENT_ID = config.CLIENT_ID;
 const OAUTH2_CLIENT_SECRET = config.CLIENT_SECRET;
@@ -33,7 +34,6 @@ router.get('/oauth2callback', async (req, res) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log(`tokens: ${tokens},tokens.id_token: ${tokens.id_token}`)
     if (!tokens.id_token) {
       throw new Error('Opps No ID token received');
     }
@@ -41,36 +41,65 @@ router.get('/oauth2callback', async (req, res) => {
       idToken: tokens.id_token,
       audience: OAUTH2_CLIENT_ID,
     });
-    const { email } = response.payload;
+    const { email, name } = response.payload;
+
+    const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
+    const channelResponse = await youtube.channels.list({
+      part: 'snippet',
+      mine: true,
+    });
+
+    const channelData = channelResponse.data.items[0];
+    const channelUrl = channelData.snippet.customUrl;
+    const youtubeChannelId = channelData.id;
+    const channelName = channelData.snippet.title;
 
     let youtuber = await Youtuber.findOne({ email });
     if (!youtuber) {
       youtuber = new Youtuber({
-        username: email,
-        password: `1234${email}`,
         email,
-        role: 'YouTuber',
+        channelName,
+        channelUrl,
+        youtubeChannelId,
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
+        role: 'YouTuber'
       });
     } else {
       youtuber.accessToken = tokens.access_token;
       youtuber.refreshToken = tokens.refresh_token;
     }
-    console.log(`youtuber: ${youtuber}`)
     await youtuber.save();
 
     const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role }, config.JWT_SECRET);
 
-    res.cookie('token', jwtToken, {
+    res.cookie('youtuberToken', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
+      maxAge: 3600000
     });
-    res.redirect('http://localhost:5173/youtuber');
+    res.redirect(`http://localhost:5173/youtuber-dashboard`);
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed');
+  }
+});
+
+router.get("/me/youtuber", authenticateYoutuber, async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(201).json({
+      userYoutuber: user
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching user information",
+      error: error.message
+    });
   }
 });
 

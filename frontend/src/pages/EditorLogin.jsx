@@ -1,14 +1,13 @@
 // src/pages/EditorLogin.js
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
-const EditorLogin = () => {
-  const { login } = useContext(AuthContext);
+function EditorLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     await login(email, password);
   };
 
@@ -16,7 +15,7 @@ const EditorLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4">Editor Login</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <input
             type="email"
             placeholder="Email"
@@ -40,6 +39,6 @@ const EditorLogin = () => {
       </div>
     </div>
   );
-};
+}
 
 export default EditorLogin;
