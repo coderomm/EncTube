@@ -7,7 +7,7 @@ function YouTuberDashboard() {
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState('');
   const { user, loading } = useContext(AuthContext);
-  const { loading2 , setLoading2 } = useState(false);
+  const [loading2 , setLoading2] = useState(false);
 
   useEffect(() => {
     if (loading) {
