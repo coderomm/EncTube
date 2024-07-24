@@ -49,6 +49,10 @@ router.get('/oauth2callback', async (req, res) => {
       mine: true,
     });
 
+    if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
+      throw new Error('No YouTube channel found for this user');
+    }
+
     const channelData = channelResponse.data.items[0];
     const channelUrl = channelData.snippet.customUrl;
     const youtubeChannelId = channelData.id;
@@ -77,9 +81,9 @@ router.get('/oauth2callback', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
-      maxAge: 3600000
+      maxAge: 3600000,
     });
-    res.redirect(`http://localhost:5173/youtuber-dashboard`);
+    res.redirect('http://localhost:5173/youtuber-dashboard');
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed');
@@ -92,6 +96,7 @@ router.get("/me/youtuber", authenticateYoutuber, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    conso
     res.status(201).json({
       userYoutuber: user
     });
@@ -104,8 +109,17 @@ router.get("/me/youtuber", authenticateYoutuber, async (req, res) => {
 });
 
 router.get('/checkAuth', (req, res) => {
-  const token = req.cookies.token;
-  res.json({ token });
+  const token = req.cookies.youtuberToken || req.cookies.editorToken;
+  if (!token) {
+    return res.status(401).json({ message: 'Not authenticated' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    res.json({ user: decoded });
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
 });
 
 module.exports = router;

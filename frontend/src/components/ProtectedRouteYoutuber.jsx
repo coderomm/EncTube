@@ -2,14 +2,18 @@ import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
-const ProtectedRouteYoutuber = ({ children }) => {
-    const { youtuber } = useContext(AuthContext);
+const ProtectedRouteYouTuber = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
 
-    if (!youtuber) {
-        return <Navigate to="/login-youtuber" />;
-    }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-    return children;
+  if (!user || user.role !== 'YouTuber') {
+    return <Navigate to="/go" />;
+  }
+
+  return children;
 };
 
-export default ProtectedRouteYoutuber;
+export default ProtectedRouteYouTuber;

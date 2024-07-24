@@ -8,8 +8,8 @@ import EditorRegister from './pages/EditorRegister';
 import EditorDashboard from './components/dashboard/EditorDashboard';
 import YouTuberDashboard from './components/dashboard/YouTuberDashboard';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRouteYoutuber from './components/ProtectedRouteYoutuber';
 import ProtectedRouteEditor from './components/ProtectedRouteEditor';
+import ProtectedRouteYouTuber from './components/ProtectedRouteYoutuber';
 
 function App() {
   return (
@@ -32,9 +32,9 @@ function App() {
           <Route
             path="/youtuber-dashboard"
             element={
-              <ProtectedRouteYoutuber>
+              <ProtectedRouteYouTuber>
                 <YouTuberDashboard />
-              </ProtectedRouteYoutuber>
+              </ProtectedRouteYouTuber>
             }
           />
         </Routes>

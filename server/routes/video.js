@@ -34,7 +34,7 @@ router.get('/videos/pending', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/videos/:id', authMiddleware, async (req, res) => {
+router.put('/video/:id', authMiddleware, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }

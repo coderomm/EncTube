@@ -1,57 +1,69 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
+import { Navigate } from 'react-router-dom';
 
 function YouTuberDashboard() {
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { user, loading } = useContext(AuthContext);
+  const { loading2 , setLoading2 } = useState(false);
 
   useEffect(() => {
-    const fetchPendingVideos = async () => {
-      try {
-        const response = await axiosInstance.get('/video/pending', { withCredentials: true });
-        setVideos(response.data);
-      } catch (error) {
-        console.error('Error fetching pending videos:', error);
-        setError('Error fetching pending videos');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (loading) {
+      return <div>Loading...</div>;
+    }
+  
+    if (!user || user.role !== 'YouTuber') {
+      return <Navigate to="/go" />;
+    }else {
+      fetchPendingVideos();
+    }
+  }, [user,loading]);
 
-    fetchPendingVideos();
-  }, []);
+  const fetchPendingVideos = async () => {
+    setLoading2(true);
+    try {
+      const response = await axiosInstance.get('/vdo/videos/pending');
+      setVideos(response.data);
+    } catch (error) {
+      console.error('Error fetching pending videos:', error);
+      setError('Error fetching pending videos');
+    } finally {
+      setLoading2(false);
+    }
+  };
 
   const handleApprove = async (id) => {
-    setLoading(true);
+    setLoading2(true);
     try {
-      await axiosInstance.put(`/video/${id}`, { status: 'Approved' }, { withCredentials: true });
+      await axiosInstance.put(`/vdo/video/${id}`, { status: 'Approved' }, { withCredentials: true });
       setVideos(videos.filter(video => video._id !== id));
     } catch (error) {
       console.error('Error approving video:', error);
       setError('Error approving video');
     } finally {
-      setLoading(false);
+      setLoading2(false);
     }
   };
 
   const handleReject = async (id) => {
-    setLoading(true);
+    setLoading2(true);
     try {
-      await axiosInstance.put(`/video/${id}`, { status: 'Rejected' }, { withCredentials: true });
+      await axiosInstance.put(`/vdo/video/${id}`, { status: 'Rejected' }, { withCredentials: true });
       setVideos(videos.filter(video => video._id !== id));
     } catch (error) {
       console.error('Error rejecting video:', error);
       setError('Error rejecting video');
     } finally {
-      setLoading(false);
+      setLoading2(false);
     }
   };
 
   return (
     <div className="p-4">
       <h1 className="text-2xl mb-4">Pending Videos</h1>
-      {loading ? (
+      {loading2 ? (
         <p>Loading...</p>
       ) : error ? (
         <p className="text-red-600">{error}</p>

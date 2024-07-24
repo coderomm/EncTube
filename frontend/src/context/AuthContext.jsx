@@ -6,29 +6,28 @@ const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [youtuber, setYoutuber] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
-    checkYoutuber();
   }, []);
 
   const checkAuth = async () => {
     try {
       const response = await axiosInstance.get('/auth/checkAuth');
-      if (response.data.user) setUser(response.data.user);
+      console.log('response.data.user: ', response.data.user)
+      if (response.data.user) {
+        setUser(response.data.user);
+        return response.data.user;
+      } else {
+        setUser(null);
+      }
     } catch (error) {
       console.error('Error checking authentication:', error);
-    }
-  };
-
-  const checkYoutuber = async () => {
-    try {
-      const response = await axiosInstance.get('/auth/me/youtuber');
-      if (response.data.user) setYoutuber(response.data.user);
-    } catch (error) {
-      console.error('Error checking authentication:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,7 +65,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, checkAuth, youtuber, checkYoutuber, register, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, checkAuth, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
