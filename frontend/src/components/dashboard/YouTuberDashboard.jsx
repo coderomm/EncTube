@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 function YouTuberDashboard() {
   const [videos, setVideos] = useState([]);
@@ -63,6 +63,7 @@ function YouTuberDashboard() {
   return (
     <div className="p-4">
       <h1 className="text-2xl mb-4">Pending Videos</h1>
+      <Link to={'invite-editor'}>Invite Editor</Link>
       {loading2 ? (
         <p>Loading...</p>
       ) : error ? (

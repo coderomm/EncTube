@@ -1,5 +1,5 @@
 // src/components/InvitationForm.js
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axiosInstance from '../utils/AxiosInstance';
 
 const InvitationForm = () => {
@@ -9,8 +9,9 @@ const InvitationForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axiosInstance.post('/invitation/sendInvitation', { editorEmail });
+            const response = await axiosInstance.post('/invitation/sendInvitation', { editorEmail: editorEmail.trim() });
             setMessage(response.data);
+            console.log('sendInvitation res: ', response)
         } catch (error) {
             setMessage('Failed to send invitation.');
             console.error(error);
@@ -18,19 +19,24 @@ const InvitationForm = () => {
     };
 
     return (
-        <div>
-            <h2>Invite Editor</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Editor Email"
-                    value={editorEmail}
-                    onChange={(e) => setEditorEmail(e.target.value)}
-                    required
-                />
-                <button type="submit">Send Invitation</button>
-            </form>
-            {message && <p>{message}</p>}
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4">Invite Editor</h2>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={editorEmail}
+                        onChange={(e) => setEditorEmail(e.target.value)}
+                        required
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg">
+                        Send Invitation
+                    </button>
+                </form>
+                {message && <p className='w-full text-center my-3 font-bold'>{message}</p>}
+            </div>
         </div>
     );
 };

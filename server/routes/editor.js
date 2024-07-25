@@ -11,11 +11,19 @@ const config = require('../config')
 
 router.post('/register', async (req, res) => {
     const { token, username, password } = req.body;
+    console.log(`token:${token}, username:${username}, password:${password}:`)
     const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
     if (!invitation) {
         return res.status(400).send('Invalid or expired token.');
     }
+    console.log('invitation:', invitation)
     try {
+        const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
+        console.log('channel:',channel)
+        if (!channel) {
+            return res.status(404).send('Channel not found.');
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         const editor = new Editor({
             username,
@@ -24,13 +32,11 @@ router.post('/register', async (req, res) => {
             role: 'Editor'
         });
         const newEditor = await editor.save();
+        console.log('newEditor:', newEditor)
 
-        const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
-        if (!channel) {
-            return res.status(404).send('Channel not found.');
-        }
         channel.editors.push(newEditor._id);
         await channel.save();
+        console.log('channel:',channel)
 
         await Invitation.deleteOne({ _id: invitation._id });
 

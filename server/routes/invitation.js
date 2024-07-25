@@ -21,7 +21,8 @@ router.post('/sendInvitation', async (req, res) => {
             await Invitation.create({ editorEmail, token, expiresAt });
 
             // Send email with the invitation link
-            const invitationLink = `http://localhost:5000/register-editor?email=${editorEmail}&token=${token}`;
+            const invitationLink = `http://localhost:5173/register-editor?email=${editorEmail}&token=${token}`;
+            console.log('invitationLink:',invitationLink)
             await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register using the following link: ${invitationLink}`);
 
             res.status(200).send('Invitation sent successfully.');

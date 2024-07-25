@@ -8,6 +8,7 @@ const config = require('../config');
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
 const { authenticateYoutuber } = require('../middleware/authMiddleware');
+const Channel = require('../models/Channel');
 
 const OAUTH2_CLIENT_ID = config.CLIENT_ID;
 const OAUTH2_CLIENT_SECRET = config.CLIENT_SECRET;
@@ -74,6 +75,16 @@ router.get('/oauth2callback', async (req, res) => {
       youtuber.refreshToken = tokens.refresh_token;
     }
     await youtuber.save();
+
+    let channel = await Channel.findOne({ youtubeChannelId });
+    if (!channel) {
+      channel = new Channel({
+        youtubeChannelId,
+        youtuber: youtuber._id,
+        editors: [],
+      });
+      await channel.save();
+    }
 
     const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role }, config.JWT_SECRET);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -26,30 +26,36 @@ function EditorRegister() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen p-4">
-            <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="Username"
-                className="input mb-2"
-            />
-            <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Email"
-                className="input mb-2"
-                disabled
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Password"
-                className="input mb-2"
-            />
-            <button className="btn" onClick={handleRegister}>Register</button>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4">Editor Register</h2>
+                <form>
+                    <input
+                        type="text"
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        placeholder="Username"
+                        required
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        disabled
+                    />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleRegister}>Register</button>
+                </form>
+            </div>
         </div>
     );
 }

@@ -10,6 +10,7 @@ import YouTuberDashboard from './components/dashboard/YouTuberDashboard';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRouteEditor from './components/ProtectedRouteEditor';
 import ProtectedRouteYouTuber from './components/ProtectedRouteYoutuber';
+import InvitationForm from './components/InvitationForm';
 
 function App() {
   return (
@@ -34,6 +35,14 @@ function App() {
             element={
               <ProtectedRouteYouTuber>
                 <YouTuberDashboard />
+              </ProtectedRouteYouTuber>
+            }
+          />
+          <Route
+            path="youtuber-dashboard/invite-editor"
+            element={
+              <ProtectedRouteYouTuber>
+                <InvitationForm />
               </ProtectedRouteYouTuber>
             }
           />
