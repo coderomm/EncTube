@@ -5,27 +5,39 @@ const crypto = require('crypto');
 const Editor = require('../models/Editor');
 const sendInvitationEmail = require('../utils/sendInvitationEmail');
 const Invitation = require('../models/Invitation');
+const { authenticateYoutuber } = require('../middleware/authMiddleware');
 
-router.post('/sendInvitation', async (req, res) => {
+router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
     const { editorEmail } = req.body;
 
     try {
-        // Check if the editor already exists
         let editor = await Editor.findOne({ email: editorEmail, role: 'Editor' });
         if (!editor) {
-            // Generate a unique token
+            console.log('!editor')
+            console.log('req.user:',req.user)
             const token = crypto.randomBytes(32).toString('hex');
             const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // Token expires in 24 hours
 
-            // Save the invitation
-            await Invitation.create({ editorEmail, token, expiresAt });
+            const youtuberId = req.user.userId;
+            const invitation = new Invitation({
+                youtuberId,
+                editorEmail,
+                token,
+                expiresAt
+            });
 
-            // Send email with the invitation link
+            await invitation.save();
+
             const invitationLink = `http://localhost:5173/register-editor?email=${editorEmail}&token=${token}`;
-            console.log('invitationLink:',invitationLink)
-            await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register using the following link: ${invitationLink}`);
+            console.log('invitationLink:', invitationLink)
 
-            res.status(200).send('Invitation sent successfully.');
+            // await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register using the following link: ${invitationLink}`);
+
+            res.status(200).json({
+                invitationLink,
+                message: 'Invitation sent successfully.',
+                status: 200
+            });
         } else {
             res.status(400).send('Editor already exists.');
         }

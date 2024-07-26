@@ -42,7 +42,7 @@ router.get('/oauth2callback', async (req, res) => {
       idToken: tokens.id_token,
       audience: OAUTH2_CLIENT_ID,
     });
-    const { email, name } = response.payload;
+    const { email } = response.payload;
 
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
     const channelResponse = await youtube.channels.list({
@@ -98,24 +98,6 @@ router.get('/oauth2callback', async (req, res) => {
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed');
-  }
-});
-
-router.get("/me/youtuber", authenticateYoutuber, async (req, res) => {
-  try {
-    const user = req.user;
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    conso
-    res.status(201).json({
-      userYoutuber: user
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error fetching user information",
-      error: error.message
-    });
   }
 });
 

@@ -15,7 +15,7 @@ function YouTuberDashboard() {
     }
   
     if (!user || user.role !== 'YouTuber') {
-      return <Navigate to="/go" />;
+      return <Navigate to="/login-youtuber" />;
     }else {
       fetchPendingVideos();
     }
@@ -62,8 +62,9 @@ function YouTuberDashboard() {
 
   return (
     <div className="p-4">
+      <Link to={'invite-editor'} className="bg-gray-800 text-white hover:text-gray-200 px-3 py-2 rounded">Invite Editor</Link>
+      <div className="my-4 h-0.5 w-full bg-black"></div>
       <h1 className="text-2xl mb-4">Pending Videos</h1>
-      <Link to={'invite-editor'}>Invite Editor</Link>
       {loading2 ? (
         <p>Loading...</p>
       ) : error ? (

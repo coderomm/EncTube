@@ -10,7 +10,7 @@ const ProtectedRouteYouTuber = ({ children }) => {
   }
 
   if (!user || user.role !== 'YouTuber') {
-    return <Navigate to="/go" />;
+    return <Navigate to="/login-youtuber" />;
   }
 
   return children;

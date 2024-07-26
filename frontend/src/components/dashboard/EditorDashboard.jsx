@@ -40,30 +40,34 @@ function EditorDashboard() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen p-4">
-            <h1 className="text-2xl mb-4">Upload Video</h1>
-            <input
-                type="text"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                placeholder="Title"
-                className="input mb-2"
-            />
-            <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Description"
-                className="input mb-2"
-            />
-            <input
-                type="file"
-                onChange={e => setFile(e.target.files[0])}
-                className="input mb-2"
-            />
-            {error && <p className="text-red-600 mb-2">{error}</p>}
-            <button className="btn" onClick={handleUpload} disabled={loading}>
-                {loading ? 'Uploading...' : 'Upload'}
-            </button>
+        <div className="min-h-screen flex items-center justify-center flex-col bg-gray-100">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold mb-4">Upload Video</h2>
+                <form>
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        placeholder="Title"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    <textarea
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="Description"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    <input
+                        type="file"
+                        onChange={e => setFile(e.target.files[0])}
+                        className="w-full mb-4 px-4 py-2 border rounded-lg"
+                    />
+                    {error && <p className="text-red-600 mb-2">{error}</p>}
+                    <button className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleUpload} disabled={loading}>
+                        {loading ? 'Uploading...' : 'Upload'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

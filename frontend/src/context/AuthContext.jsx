@@ -33,9 +33,11 @@ const AuthProvider = ({ children }) => {
 
   const register = async (token, username, email, password) => {
     try {
-      await axiosInstance.post('/auth/editor/register', { token, username, email, password });
-      alert('Editor Registration Successful')
-      await login(email, password);
+      const registerResponse = await axiosInstance.post('/auth/editor/register', { token, username, email, password });
+      console.log('Editor Registration Successful', registerResponse)
+      const loginResponse = await login(email, password);
+      console.log('loginResponse', loginResponse)
+      return loginResponse;
     } catch (error) {
       console.error('Editor Registration failed', error);
       alert('Editor Registration failed', error)

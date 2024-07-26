@@ -11,12 +11,10 @@ const config = require('../config')
 
 router.post('/register', async (req, res) => {
     const { token, username, password } = req.body;
-    console.log(`token:${token}, username:${username}, password:${password}:`)
     const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
     if (!invitation) {
         return res.status(400).send('Invalid or expired token.');
     }
-    console.log('invitation:', invitation)
     try {
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
         console.log('channel:',channel)
@@ -40,7 +38,11 @@ router.post('/register', async (req, res) => {
 
         await Invitation.deleteOne({ _id: invitation._id });
 
-        res.status(201).json(newEditor);
+        res.status(201).json({
+            status:201,
+            message:'Successful editor register!',
+            newEditor
+        });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

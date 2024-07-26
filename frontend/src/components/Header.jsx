@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 
 function Header() {
   return (
-    <header className="bg-blue-600 p-4 text-white">
+    <header className="bg-gray-800 text-white hover:text-gray-50 p-4">
       <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-xl font-bold">YouTube Uploader</h1>
-        <nav>
-          <Link to="/" className="mr-4 text-white">Home</Link>
-          <Link to="/login-youtuber" className="mr-4 text-white">YouTuber Login</Link>
-          <Link to="/login-editor" className="mr-4 text-white">Editor Login</Link>
+        <nav className='flex items-center justify-center flex-wrap gap-2'>
+          <Link to="/" className="bg-white text-gray-800 px-3 py-2 rounded">Home</Link>
+          <Link to="/youtuber-dashboard" className="bg-white text-gray-800 px-3 py-2 rounded">YouTuber Dashboard</Link>
+          <Link to="/editor-dashboard" className="bg-white text-gray-800 px-3 py-2 rounded">Editor Dashboard</Link>
         </nav>
       </div>  
     </header>
