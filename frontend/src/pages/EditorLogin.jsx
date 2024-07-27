@@ -1,14 +1,30 @@
 // src/pages/EditorLogin.js
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function EditorLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    await login(email, password);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await login(email, password);
+      if (response.status === 200) {
+        console.log('editor login res:', response)
+        alert(response.message)
+        navigate('/editor-dashboard')
+      }
+      else {
+        alert('Editor Registration failed')
+        console.error('editor login res:', response)
+      }
+    } catch (error) {
+      console.error('Registration failed', error);
+    }
   };
 
   return (

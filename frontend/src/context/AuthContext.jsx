@@ -33,25 +33,34 @@ const AuthProvider = ({ children }) => {
 
   const register = async (token, username, email, password) => {
     try {
-      const registerResponse = await axiosInstance.post('/auth/editor/register', { token, username, email, password });
-      console.log('Editor Registration Successful', registerResponse)
-      const loginResponse = await login(email, password);
-      console.log('loginResponse', loginResponse)
-      return loginResponse;
+      const response = await axiosInstance.post('/auth/editor/register', { token, username, email, password });
+      if (response.data.status === 201) {
+        console.log(`${response.data.message}:,${response}`)
+        alert(`${response.data.message}`)
+        return response.data;
+      } else {
+        console.log('Editor Registration failed', response);
+        alert('Editor Registration failed')
+        return response;
+      }
     } catch (error) {
       console.error('Editor Registration failed', error);
-      alert('Editor Registration failed', error)
+      alert('Editor Registration failed')
     }
   };
 
   const login = async (email, password) => {
     try {
       const response = await axiosInstance.post('/auth/editor/login', { email, password });
-      if (response.data.user) setUser(response.data.user);
-      alert('Editor Login Successful')
-      navigate('/editor-dashboard');
+      if (response.data.status === 200) {
+        setUser(response.data.editor)
+        console.log(`${response.data.message}:${response}`)
+        alert(response.data.message)
+        return response.data;
+      }
     } catch (error) {
       console.error('Editor Login failed', error);
+      alert('Editor Login failed');
     }
   };
 

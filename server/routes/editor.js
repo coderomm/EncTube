@@ -17,30 +17,29 @@ router.post('/register', async (req, res) => {
     }
     try {
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
-        console.log('channel:',channel)
+        console.log('channel:', channel)
         if (!channel) {
             return res.status(404).send('Channel not found.');
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const editor = new Editor({
             username,
             email: invitation.editorEmail,
             password: hashedPassword,
-            role: 'Editor'
+            role: 'Editor',
+            channel: [channel._id]
         });
         const newEditor = await editor.save();
         console.log('newEditor:', newEditor)
-
         channel.editors.push(newEditor._id);
         await channel.save();
-        console.log('channel:',channel)
-
+        console.log('channel:', channel)
         await Invitation.deleteOne({ _id: invitation._id });
 
         res.status(201).json({
-            status:201,
-            message:'Successful editor register!',
+            status: 201,
+            message: 'Editor register successful!',
             newEditor
         });
     } catch (error) {
@@ -54,7 +53,17 @@ router.post('/login', async (req, res) => {
         const editor = await Editor.findOne({ email });
         if (editor && await bcrypt.compare(password, editor.password)) {
             const token = jwt.sign({ editorId: editor._id, role: editor.role }, config.JWT_SECRET);
-            res.json({ token });
+            res.cookie('editorToken', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Strict',
+                maxAge: 3600000,
+            });
+            res.status(200).json({
+                status: 200,
+                message: 'Editor login successful!',
+                editor
+            });
         } else {
             res.status(400).json({ message: 'Invalid credentials' });
         }

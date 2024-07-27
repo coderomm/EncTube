@@ -1,19 +1,28 @@
-import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import axiosInstance from '../../utils/AxiosInstance';
 import { AuthContext } from '../../context/AuthContext';
 
 function EditorDashboard() {
+    const { user, loading } = useContext(AuthContext);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [file, setFile] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading2, setLoading2] = useState(false);
     const [error, setError] = useState('');
-    const { user } = useContext(AuthContext);
-    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (loading) {
+            return <div>Loading...</div>;
+        }
+
+        if (!user || user.role !== 'Editor') {
+            return <Navigate to="/login-editor" />;
+        }
+    }, [user, loading]);
 
     const handleUpload = async () => {
-        setLoading(true);
+        setLoading2(true);
         setError('');
         const formData = new FormData();
         formData.append('title', title);
@@ -35,7 +44,7 @@ function EditorDashboard() {
             console.error('Error uploading video:', error);
             setError('Failed to upload video');
         } finally {
-            setLoading(false);
+            setLoading2(false);
         }
     };
 
@@ -63,8 +72,8 @@ function EditorDashboard() {
                         className="w-full mb-4 px-4 py-2 border rounded-lg"
                     />
                     {error && <p className="text-red-600 mb-2">{error}</p>}
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleUpload} disabled={loading}>
-                        {loading ? 'Uploading...' : 'Upload'}
+                    <button className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleUpload} disabled={loading2}>
+                        {loading2 ? 'Uploading...' : 'Upload'}
                     </button>
                 </form>
             </div>

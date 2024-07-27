@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 function EditorRegister() {
@@ -18,15 +18,16 @@ function EditorRegister() {
         if (tokenParam) setToken(tokenParam);
     }, [searchParams]);
 
-    const handleRegister = async () => {
+    const handleRegister = async (e) => {
+        e.preventDefault();
         try {
             const response = await register(token, username, email, password);
-            if (response.data.status === 201) {
-                alert(response.data.message)
+            if (response.status === 201) {
                 console.log('editor register res:', response)
-                navigate('/editor-dashboard')
+                alert(response.message)
+                navigate('/login-editor')
             }
-            else{
+            else {
                 alert('Editor Registration failed')
                 console.error('editor register res:', response)
             }
