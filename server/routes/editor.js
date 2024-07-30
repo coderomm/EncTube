@@ -6,8 +6,8 @@ const Editor = require('../models/Editor');
 const Invitation = require('../models/Invitation');
 const Channel = require('../models/Channel');
 const jwt = require('jsonwebtoken');
-const { authMiddleware } = require('../middleware/authMiddleware');
-const config = require('../config')
+const { authenticateEditor } = require('../middleware/authMiddleware');
+// const process.env = require('../process.env')
 
 router.post('/register', async (req, res) => {
     const { token, username, password } = req.body;
@@ -17,30 +17,40 @@ router.post('/register', async (req, res) => {
     }
     try {
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
-        console.log('channel:', channel)
         if (!channel) {
+            console.error('Error registering editor. Channel not found.');
             return res.status(404).send('Channel not found.');
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const editor = new Editor({
-            username,
-            email: invitation.editorEmail,
-            password: hashedPassword,
-            role: 'Editor',
-            channel: [channel._id]
-        });
-        const newEditor = await editor.save();
-        console.log('newEditor:', newEditor)
-        channel.editors.push(newEditor._id);
+        const editor = await Editor.findOne({ email: invitation.editorEmail });
+        if (editor) {
+            // If editor exists, update the editor's channels
+            // if (!editor.channels.includes(channel._id)) {
+            //     editor.channels.push(channel._id);
+            //     await editor.save();
+            // }
+
+            editor.channels = [...new Set([...editor.channels, channel._id])];
+            await editor.save();
+        } else {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            editor = new Editor({
+                username,
+                email: invitation.editorEmail,
+                password: hashedPassword,
+                role: 'Editor',
+                channels: [channel._id]
+            });
+            await editor.save();
+        }
+        channel.editors.push(editor._id);
         await channel.save();
-        console.log('channel:', channel)
         await Invitation.deleteOne({ _id: invitation._id });
 
         res.status(201).json({
             status: 201,
             message: 'Editor register successful!',
-            newEditor
+            editor
         });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -52,7 +62,7 @@ router.post('/login', async (req, res) => {
     try {
         const editor = await Editor.findOne({ email });
         if (editor && await bcrypt.compare(password, editor.password)) {
-            const token = jwt.sign({ editorId: editor._id, role: editor.role }, config.JWT_SECRET);
+            const token = jwt.sign({ editorId: editor._id, role: editor.role }, process.env.JWT_SECRET);
             res.cookie('editorToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -72,7 +82,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post("/logout", authMiddleware, (req, res) => {
+router.post("/logout", authenticateEditor, (req, res) => {
     try {
         res.cookie('token', '', {
             httpOnly: true,

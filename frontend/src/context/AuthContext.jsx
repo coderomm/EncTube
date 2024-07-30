@@ -35,8 +35,8 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axiosInstance.post('/auth/editor/register', { token, username, email, password });
       if (response.data.status === 201) {
-        console.log(`${response.data.message}:,${response}`)
-        alert(`${response.data.message}`)
+        console.log('Editor Registration Successful', response)
+        alert('Editor Registration Successful');
         return response.data;
       } else {
         console.log('Editor Registration failed', response);
@@ -74,6 +74,10 @@ const AuthProvider = ({ children }) => {
       console.error('Logout failed', error);
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider value={{ user, loading, checkAuth, register, login, logout }}>

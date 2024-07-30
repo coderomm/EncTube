@@ -14,6 +14,7 @@ dist-ssrw
 *.local
 .env
 *.env
+multerConfig.js
 
 # Editor directories and files
 .vscode/*

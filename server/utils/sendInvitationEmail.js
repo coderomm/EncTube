@@ -1,32 +1,37 @@
 // utils/sendInvitationEmail.js
 const nodemailer = require('nodemailer');
-const config = require('../config');
 
 const sendInvitationEmail = async (to, subject, text) => {
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: config.EMAIL_USER,
-      pass: config.EMAIL_PASS2,
-    },
-    debug: true
-  });
-
-  const mailOptions = {
-    from: config.EMAIL_USER,
-    to,
-    subject,
-    text,
-  };
-
+  if (!to || !subject || !text) {
+    return res.status(400).send('To send a email all fields are required.');
+  }
   try {
-    await transporter.sendMail(mailOptions);
-    console.log('Invitation email sent successfully');
+    const transport = nodemailer.createTransport({
+      service: 'gmail',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      logger: true,
+      debug: true,
+    });
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to,
+      subject,
+      text
+    };
+
+    const result = await transport.sendMail(mailOptions);
+    console.log('Invitation Email sent:', result)
   } catch (error) {
     console.error('Error sending invitation email:', error);
-    throw new Error('Error sending invitation email'); // Ensure the error is propagated
+    res.status(500).send(error);
   }
 };
 

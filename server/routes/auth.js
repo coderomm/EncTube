@@ -1,26 +1,22 @@
 // routes/auth.js
 const express = require('express');
 const router = express.Router();
-const editorRouter = require('./editor')
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 const config = require('../config');
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
-const { authenticateYoutuber } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
 
-const OAUTH2_CLIENT_ID = config.CLIENT_ID;
-const OAUTH2_CLIENT_SECRET = config.CLIENT_SECRET;
-const OAUTH2_REDIRECT_URL = config.REDIRECT_URI;
+const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
+const OAUTH2_CLIENT_SECRET = process.env.CLIENT_SECRET;
+const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URI;
 
 const oauth2Client = new OAuth2(
   OAUTH2_CLIENT_ID,
   OAUTH2_CLIENT_SECRET,
   OAUTH2_REDIRECT_URL
 );
-
-router.use("/editor", editorRouter);
 
 router.get('/youtuber', (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
@@ -86,7 +82,7 @@ router.get('/oauth2callback', async (req, res) => {
       await channel.save();
     }
 
-    const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role }, config.JWT_SECRET);
+    const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role }, process.env.JWT_SECRET);
 
     res.cookie('youtuberToken', jwtToken, {
       httpOnly: true,
@@ -94,7 +90,7 @@ router.get('/oauth2callback', async (req, res) => {
       sameSite: 'Strict',
       maxAge: 3600000,
     });
-    res.redirect('http://localhost:5173/youtuber-dashboard');
+    res.redirect(`${process.env.FRONTEND_URL}/youtuber-dashboard`);
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed');
@@ -115,4 +111,38 @@ router.get('/checkAuth', (req, res) => {
   }
 });
 
+// router.get('/checkAuth', async (req, res) => {
+//   try {
+//     const youtuberToken = req.cookies.youtuberToken;
+//     const editorToken = req.cookies.editorToken;
+//     const result = {};
+
+//     if (youtuberToken) {
+//       const decoded = jwt.verify(youtuberToken, config.JWT_SECRET);
+//       const youtuber = await Youtuber.findById(decoded.userId).select('-password');
+
+//       if (youtuber) {
+//         result.youtuber = youtuber;
+//       }
+//     }
+
+//     if (editorToken) {
+//       const decoded = jwt.verify(editorToken, config.JWT_SECRET);
+//       const editor = await Editor.findById(decoded.userId).select('-password');
+
+//       if (editor) {
+//         result.editor = editor;
+//       }
+//     }
+
+//     if (result.youtuber || result.editor) {
+//       return res.status(200).json(result);
+//     } else {
+//       return res.status(401).json({ message: 'Unauthorized' });
+//     }
+//   } catch (error) {
+//     console.error('Error in checkAuth:', error);
+//     return res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// });
 module.exports = router;

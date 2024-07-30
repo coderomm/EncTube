@@ -1,21 +1,31 @@
 // utils/sendNotificationEmail.js
 const nodemailer = require('nodemailer');
-const config = require('../config');
 
 const sendNotificationEmail = async (subject, text, to, videoId) => {
-    const transporter = nodemailer.createTransport({
-        service: config.EMAIL_SERVICE,
-        auth: {
-            user: config.EMAIL_USER,
-            pass: config.EMAIL_PASS,
-        },
-    });
+    if (!subject || !text || !to || !videoId) {
+        return res.status(400).send('To send a email all fields are required.');
+    }
+    try {
+        const transport = nodemailer.createTransport({
+            service: 'gmail',
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_PASS,
+            },
+            tls: {
+                rejectUnauthorized: false
+            },
+            logger: true,
+            debug: true,
+        });
 
-    const mailOptions = {
-        from: 'omopyt2020@gmail.com',
-        to,
-        subject,
-        html: `
+        const mailOptions = {
+            from: process.env.GMAIL_USER,
+            to,
+            subject,
+            html: `
       <p>${text}</p>
       <p>Video Title: ${subject}</p>
       <p>
@@ -24,14 +34,13 @@ const sendNotificationEmail = async (subject, text, to, videoId) => {
         <a href="http://localhost:3000/approve?action=hold&videoId=${videoId}">Hold</a>
       </p>
     `
-    };
+        };
 
-    await transporter.sendMail(mailOptions);
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('Notification email sent successfully');
+        const response = await transport.sendMail(mailOptions);
+        console.log('Video notification from editor:', response)
     } catch (error) {
-        console.error('Error sending notification email:', error);
+        console.error('Error sending invitation email:', error);
+        res.status(500).send(error);
     }
 };
 

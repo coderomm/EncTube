@@ -1,11 +1,11 @@
 // routes/channel.js
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { authenticateEditor } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
 const Editor = require('../models/Editor');
 
-router.post('/addEditor', authMiddleware, async (req, res) => {
+router.post('/addEditor', authenticateEditor, async (req, res) => {
   const { editorEmail } = req.body;
   try {
     if (req.user.role !== 'YouTuber') {

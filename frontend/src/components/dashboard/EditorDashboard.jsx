@@ -30,12 +30,12 @@ function EditorDashboard() {
         formData.append('file', file);
 
         try {
-            await axiosInstance.post('/vdo/upload', formData, {
+            const response = await axiosInstance.post('/vdo/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
-                withCredentials: true
             });
+            console.log('upload response:',response)
             alert('Video uploaded successfully, waiting for approval');
             setTitle('');
             setDescription('');

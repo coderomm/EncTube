@@ -1,44 +1,68 @@
 // routes/video.js
 const express = require('express');
 const router = express.Router();
+const upload = require('../multerConfig');
 const Video = require('../models/Video');
 const Youtuber = require('../models/Youtuber');
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { authenticateEditor } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
 const config = require('../config');
 const oAuth2Client = new OAuth2Client(config.CLIENT_ID, config.CLIENT_SECRET, config.REDIRECT_URI);
 const fs = require('fs');
-const multer = require('multer');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
+router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
+  const { title, description, userId, editorId } = req.body;
+  const filePath = req.file.path;
+
+  try {
+    const video = new Video({
+      youtuberId: userId,
+      editorId,
+      title,
+      description,
+      filePath,
+      status: 'Pending',
+      youtubeVideoId: ''
+    });
+    await video.save();
+
+    // const youtuber = await Youtuber.findById(userId);
+    // if (!youtuber) {
+    //   return res.status(404).send('YouTuber not found');
+    // }
+
+    // await sendEmailNotification(
+    //   'New Video Uploaded',
+    //   `A new video titled "${title}" has been uploaded and is pending approval.`,
+    //   youtuber.email,
+    //   video._id
+    // );
+
+    fs.unlinkSync(filePath);
+
+    res.status(201).send(`Video uploaded successfully. Video ID: ${video._id}`);
+  } catch (error) {
+    console.error('Error uploading video:', error);
+    res.status(500).send('Error uploading video');
+  }
 });
 
-const upload = multer({ storage });
-
-router.get('/videos/pending', authMiddleware, async (req, res) => {
+router.get('/videos/pending', authenticateEditor, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }
-
   try {
     const videos = await Video.find({ status: 'Pending' });
-    res.json(videos);
+    res.status(200).json(videos);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-router.put('/video/:id', authMiddleware, async (req, res) => {
+router.put('/video/:id', authenticateEditor, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }
-
   try {
     const video = await Video.findById(req.params.id);
     if (!video) {
@@ -80,43 +104,6 @@ router.put('/video/:id', authMiddleware, async (req, res) => {
     res.send('Video status updated');
   } catch (error) {
     res.status(500).send('Error updating video status');
-  }
-});
-
-router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
-  const { title, description, userId, editorId } = req.body;
-  const filePath = req.file.path;
-
-  try {
-    const video = new Video({
-      youtuberId: userId,  // Changed to youtuberId
-      editorId,
-      title,
-      description,
-      filePath,
-      status: 'Pending',
-      youtubeVideoId: ''
-    });
-    await video.save();
-
-    const youtuber = await Youtuber.findById(userId);  // Use Youtuber model
-    if (!youtuber) {
-      return res.status(404).send('YouTuber not found');
-    }
-
-    await sendEmailNotification(
-      'New Video Uploaded',
-      `A new video titled "${title}" has been uploaded and is pending approval.`,
-      youtuber.email,
-      video._id
-    );
-
-    fs.unlinkSync(filePath);
-
-    res.send(`Video uploaded. Video ID: ${video._id}`);
-  } catch (error) {
-    console.error('Error uploading video:', error);
-    res.status(500).send('Error uploading video');
   }
 });
 
