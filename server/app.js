@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const mainRouter = require("./routes/index");
-const config = require('./config');
 const app = express();
 const PORT = 5000;
 

@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config');
 
 const authenticateEditor = (req, res, next) => {
     const token = req.cookies.editorToken;
@@ -9,7 +8,7 @@ const authenticateEditor = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, config.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (decoded.role !== 'Editor') {
             return res.status(403).send('Access denied, Editor role required');
         }
@@ -27,7 +26,7 @@ const authenticateYoutuber = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, config.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (decoded.role !== 'YouTuber') {
             return res.status(403).send('Access denied, YouTuber role required');
         }

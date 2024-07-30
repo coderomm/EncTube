@@ -6,8 +6,7 @@ const Video = require('../models/Video');
 const Youtuber = require('../models/Youtuber');
 const { authenticateEditor } = require('../middleware/authMiddleware');
 const { OAuth2Client } = require('google-auth-library');
-const config = require('../config');
-const oAuth2Client = new OAuth2Client(config.CLIENT_ID, config.CLIENT_SECRET, config.REDIRECT_URI);
+const oAuth2Client = new OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);
 const fs = require('fs');
 
 router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {

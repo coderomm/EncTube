@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
-const config = require('../config');
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
 const Channel = require('../models/Channel');
@@ -104,7 +103,7 @@ router.get('/checkAuth', (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, config.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     res.json({ user: decoded });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
@@ -118,7 +117,7 @@ router.get('/checkAuth', (req, res) => {
 //     const result = {};
 
 //     if (youtuberToken) {
-//       const decoded = jwt.verify(youtuberToken, config.JWT_SECRET);
+//       const decoded = jwt.verify(youtuberToken, process.env.JWT_SECRET);
 //       const youtuber = await Youtuber.findById(decoded.userId).select('-password');
 
 //       if (youtuber) {
@@ -127,7 +126,7 @@ router.get('/checkAuth', (req, res) => {
 //     }
 
 //     if (editorToken) {
-//       const decoded = jwt.verify(editorToken, config.JWT_SECRET);
+//       const decoded = jwt.verify(editorToken, process.env.JWT_SECRET);
 //       const editor = await Editor.findById(decoded.userId).select('-password');
 
 //       if (editor) {
