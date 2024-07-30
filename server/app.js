@@ -8,7 +8,7 @@ const PORT = 5000;
 
 async function dbConnect() {
   try {
-    await mongoose.connect(config.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log('Successfully connected to MongoDB Atlas!');
   } catch (error) {
     console.log('Unable to connect to MongoDB Atlas! error: ', error);
