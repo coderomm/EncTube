@@ -11,6 +11,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRouteEditor from './components/ProtectedRouteEditor';
 import ProtectedRouteYouTuber from './components/ProtectedRouteYoutuber';
 import InvitationForm from './components/InvitationForm';
+import ConfirmChannel from './pages/ConfirmChannel';
+import ChannelDetails from './pages/ChannelPage';
 
 function App() {
   return (
@@ -22,11 +24,20 @@ function App() {
           <Route path="/login-youtuber" element={<YouTuberLogin />} />
           <Route path="/login-editor" element={<EditorLogin />} />
           <Route path="/register-editor" element={<EditorRegister />} />
+          <Route path="/editor/confirm-channel" element={<ConfirmChannel />} />
           <Route
             path="/editor-dashboard"
             element={
               <ProtectedRouteEditor>
                 <EditorDashboard />
+              </ProtectedRouteEditor>
+            }
+          />
+          <Route
+            path="/editor/channel/:channelId"
+            element={
+              <ProtectedRouteEditor>
+                <ChannelDetails />
               </ProtectedRouteEditor>
             }
           />

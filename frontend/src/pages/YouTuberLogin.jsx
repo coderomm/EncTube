@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 
 function YouTuberLogin() {
   useEffect(() => {
-    window.location.href = 'https://yt-vdo-manager.onrender.com/api/v1/auth/youtuber';
+    window.location.href = 'http://localhost:5000/api/v1/auth/youtuber';
+    // window.location.href = 'https://yt-vdo-manager.onrender.com/api/v1/auth/youtuber';
   }, []);
 
   return (

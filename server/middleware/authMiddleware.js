@@ -13,6 +13,7 @@ const authenticateEditor = (req, res, next) => {
             return res.status(403).send('Access denied, Editor role required');
         }
         req.user = decoded;
+        console.log('Editor user:', decoded)
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');
@@ -31,6 +32,7 @@ const authenticateYoutuber = (req, res, next) => {
             return res.status(403).send('Access denied, YouTuber role required');
         }
         req.user = decoded;
+        console.log('YouTuber user:', decoded)
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');

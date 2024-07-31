@@ -1,34 +1,40 @@
 // routes/video.js
 const express = require('express');
 const router = express.Router();
-const upload = require('../multerConfig');
-const Video = require('../models/Video');
-const Youtuber = require('../models/Youtuber');
-const { authenticateEditor } = require('../middleware/authMiddleware');
+const fs = require('fs');
 const { OAuth2Client } = require('google-auth-library');
 const oAuth2Client = new OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);
-const fs = require('fs');
+const axios = require('axios');
+const upload = require('../multerConfig');
+const Video = require('../models/Video');
+const Channel = require('../models/Channel');
+const Youtuber = require('../models/Youtuber');
+const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
 
 router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
-  const { title, description, userId, editorId } = req.body;
-  const filePath = req.file.path;
+  const { title, description, channelId } = req.body;
 
   try {
+    const channel = await Channel.findById(channelId);
+    if (!channel) {
+      return res.status(404).send('Channel not found');
+    }
     const video = new Video({
-      youtuberId: userId,
-      editorId,
       title,
       description,
       filePath,
       status: 'Pending',
-      youtubeVideoId: ''
+      youtubeVideoId: '',
+      youtuberId: channel.youtuber,
+      editorId: req.user.userId,
+      channelId
     });
     await video.save();
 
-    // const youtuber = await Youtuber.findById(userId);
-    // if (!youtuber) {
-    //   return res.status(404).send('YouTuber not found');
-    // }
+    const youtuber = await Youtuber.findById(channel.youtuber);
+    if (!youtuber) {
+      return res.status(404).send('YouTuber not found');
+    }
 
     // await sendEmailNotification(
     //   'New Video Uploaded',
@@ -36,6 +42,22 @@ router.post('/upload', authenticateEditor, upload.single('file'), async (req, re
     //   youtuber.email,
     //   video._id
     // );
+
+    const emailPayload = {
+      to: youtuber.email,
+      subject: 'New Video Uploaded on YT Studio Manager',
+      text: `A new video titled "${title}" has been uploaded by editor and is pending approval.
+
+      Click on this link to Approve :- http://localhost:3000/approve?action=approve&videoId=${video._id} ,
+
+      Click on this link to Reject :- http://localhost:3000/approve?action=reject&videoId=${video._id} ,
+      
+      Click on this link to Hold :- http://localhost:3000/approve?action=hold&videoId=${video._id}
+      `,
+    };
+    console.log('emailPayload.text:', emailPayload)
+    const response = await axios.post('https://send-anonymous-mail.onrender.com/api/v1/send-email', emailPayload);
+    console.log('Send notification res:', response)
 
     fs.unlinkSync(filePath);
 
@@ -46,19 +68,17 @@ router.post('/upload', authenticateEditor, upload.single('file'), async (req, re
   }
 });
 
-router.get('/videos/pending', authenticateEditor, async (req, res) => {
-  if (req.user.role !== 'YouTuber') {
-    return res.status(403).send('Access denied');
-  }
+router.get('/pending', authenticateEditor, async (req, res) => {
+  const { channelId } = req.query;
   try {
-    const videos = await Video.find({ status: 'Pending' });
-    res.status(200).json(videos);
+    const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
+    res.status(200).json(pendingVideos);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Error fetching pending videos' });
   }
 });
 
-router.put('/video/:id', authenticateEditor, async (req, res) => {
+router.put('/:id', authenticateYoutuber, async (req, res) => {
   if (req.user.role !== 'YouTuber') {
     return res.status(403).send('Access denied');
   }
@@ -105,5 +125,15 @@ router.put('/video/:id', authenticateEditor, async (req, res) => {
     res.status(500).send('Error updating video status');
   }
 });
+
+router.get('/channel/:channelId/pending', authenticateEditor, async (req, res) => {
+  try {
+    const videos = await Video.find({ channelId: req.params.channelId, status: 'Pending' });
+    res.status(200).json(videos);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching pending videos' });
+  }
+});
+
 
 module.exports = router;

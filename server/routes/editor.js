@@ -7,7 +7,6 @@ const Invitation = require('../models/Invitation');
 const Channel = require('../models/Channel');
 const jwt = require('jsonwebtoken');
 const { authenticateEditor } = require('../middleware/authMiddleware');
-// const process.env = require('../process.env')
 
 router.post('/register', async (req, res) => {
     const { token, username, password } = req.body;
@@ -22,14 +21,8 @@ router.post('/register', async (req, res) => {
             return res.status(404).send('Channel not found.');
         }
 
-        const editor = await Editor.findOne({ email: invitation.editorEmail });
+        let editor = await Editor.findOne({ email: invitation.editorEmail });
         if (editor) {
-            // If editor exists, update the editor's channels
-            // if (!editor.channels.includes(channel._id)) {
-            //     editor.channels.push(channel._id);
-            //     await editor.save();
-            // }
-
             editor.channels = [...new Set([...editor.channels, channel._id])];
             await editor.save();
         } else {
@@ -62,7 +55,7 @@ router.post('/login', async (req, res) => {
     try {
         const editor = await Editor.findOne({ email });
         if (editor && await bcrypt.compare(password, editor.password)) {
-            const token = jwt.sign({ editorId: editor._id, role: editor.role }, process.env.JWT_SECRET);
+            const token = jwt.sign({ userId: editor._id, role: editor.role }, process.env.JWT_SECRET);
             res.cookie('editorToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -95,6 +88,15 @@ router.post("/logout", authenticateEditor, (req, res) => {
             message: "Internal server error",
             error: error.message
         });
+    }
+});
+
+router.get('/channels', authenticateEditor, async (req, res) => {
+    try {
+        const channels = await Channel.find({ editors: req.user.userId }).populate('youtuber', 'channelName channelUrl');
+        res.status(200).json(channels);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching channels' });
     }
 });
 

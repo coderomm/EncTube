@@ -7,11 +7,11 @@ const sendInvitationEmail = require('../utils/sendInvitationEmail');
 const Invitation = require('../models/Invitation');
 const { authenticateYoutuber } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
+const axios = require('axios');
 
 router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
     const { editorEmail } = req.body;
     try {
-        console.log('yt.req.user:', req.user)
         const editor = await Editor.findOne({ email: editorEmail, role: 'Editor' });
 
         const token = crypto.randomBytes(32).toString('hex');
@@ -25,7 +25,15 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
         } else {
             invitationLink = `${process.env.FRONTEND_URL}/register-editor?email=${editorEmail}&token=${token}`;
         }
-        await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register/confirm using the following link: ${invitationLink}`);
+        console.log('invitationLink: ', invitationLink)
+        // const response = await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register/confirm using the following link: ${invitationLink}`);
+
+        const emailPayload = {
+            to: editorEmail,
+            subject: 'Invitation to Join as an Editor',
+            text: `Please register/confirm using the following link: ${invitationLink}`
+        };
+        await axios.post('https://send-anonymous-mail.onrender.com/api/v1/send-email', emailPayload);
 
         res.status(200).json({
             invitationLink,
@@ -39,7 +47,7 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
 });
 
 router.post('/confirmChannel', async (req, res) => {
-    const { token, email } = req.body;
+    const { token } = req.body;
     const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
 
     if (!invitation) {

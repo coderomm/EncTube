@@ -9,7 +9,7 @@ const Channel = require('../models/Channel');
 
 const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
 const OAUTH2_CLIENT_SECRET = process.env.CLIENT_SECRET;
-const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URI;
+const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URL;
 
 const oauth2Client = new OAuth2(
   OAUTH2_CLIENT_ID,
@@ -104,44 +104,10 @@ router.get('/checkAuth', (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ user: decoded });
+    res.status(200).json({ user: decoded });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
   }
 });
 
-// router.get('/checkAuth', async (req, res) => {
-//   try {
-//     const youtuberToken = req.cookies.youtuberToken;
-//     const editorToken = req.cookies.editorToken;
-//     const result = {};
-
-//     if (youtuberToken) {
-//       const decoded = jwt.verify(youtuberToken, process.env.JWT_SECRET);
-//       const youtuber = await Youtuber.findById(decoded.userId).select('-password');
-
-//       if (youtuber) {
-//         result.youtuber = youtuber;
-//       }
-//     }
-
-//     if (editorToken) {
-//       const decoded = jwt.verify(editorToken, process.env.JWT_SECRET);
-//       const editor = await Editor.findById(decoded.userId).select('-password');
-
-//       if (editor) {
-//         result.editor = editor;
-//       }
-//     }
-
-//     if (result.youtuber || result.editor) {
-//       return res.status(200).json(result);
-//     } else {
-//       return res.status(401).json({ message: 'Unauthorized' });
-//     }
-//   } catch (error) {
-//     console.error('Error in checkAuth:', error);
-//     return res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// });
 module.exports = router;

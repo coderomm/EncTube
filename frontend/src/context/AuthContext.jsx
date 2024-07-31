@@ -33,7 +33,7 @@ const AuthProvider = ({ children }) => {
 
   const register = async (token, username, email, password) => {
     try {
-      const response = await axiosInstance.post('/auth/editor/register', { token, username, email, password });
+      const response = await axiosInstance.post('/editor/register', { token, username, email, password });
       if (response.data.status === 201) {
         console.log('Editor Registration Successful', response)
         alert('Editor Registration Successful');
@@ -51,7 +51,7 @@ const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axiosInstance.post('/auth/editor/login', { email, password });
+      const response = await axiosInstance.post('/editor/login', { email, password });
       if (response.data.status === 200) {
         setUser(response.data.editor)
         console.log(`${response.data.message}:${response}`)
@@ -66,7 +66,7 @@ const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/auth/editor/logout');
+      await axiosInstance.post('/editor/logout');
       setUser(null);
       alert('Editor logout successful')
       navigate('/home');

@@ -1,15 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import axiosInstance from '../../utils/AxiosInstance';
+import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import axiosInstance from '../../utils/AxiosInstance';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 function EditorDashboard() {
     const { user, loading } = useContext(AuthContext);
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [file, setFile] = useState(null);
-    const [loading2, setLoading2] = useState(false);
-    const [error, setError] = useState('');
+    const [channels, setChannels] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (loading) {
@@ -19,64 +17,54 @@ function EditorDashboard() {
         if (!user || user.role !== 'Editor') {
             return <Navigate to="/login-editor" />;
         }
+        const fetchChannels = async () => {
+            try {
+                const response = await axiosInstance.get('/editor/channels');
+                console.log('fetchChannels res:', response)
+                setChannels(response.data);
+            } catch (error) {
+                console.error('Error fetching channels:', error);
+            }
+        };
+
+        fetchChannels();
     }, [user, loading]);
 
-    const handleUpload = async () => {
-        setLoading2(true);
-        setError('');
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('description', description);
-        formData.append('file', file);
+    const filteredChannels = channels.filter(channel =>
+        channel.youtuber.channelName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-        try {
-            const response = await axiosInstance.post('/vdo/upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
-            });
-            console.log('upload response:',response)
-            alert('Video uploaded successfully, waiting for approval');
-            setTitle('');
-            setDescription('');
-            setFile(null);
-        } catch (error) {
-            console.error('Error uploading video:', error);
-            setError('Failed to upload video');
-        } finally {
-            setLoading2(false);
-        }
+    const handleSelectChannel = (channelId) => {
+        navigate(`/editor/channel/${channelId}`);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center flex-col bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-4">Upload Video</h2>
-                <form>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                        placeholder="Title"
-                        className="w-full mb-4 px-4 py-2 border rounded-lg"
-                    />
-                    <textarea
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
-                        placeholder="Description"
-                        className="w-full mb-4 px-4 py-2 border rounded-lg"
-                    />
-                    <input
-                        type="file"
-                        onChange={e => setFile(e.target.files[0])}
-                        className="w-full mb-4 px-4 py-2 border rounded-lg"
-                    />
-                    {error && <p className="text-red-600 mb-2">{error}</p>}
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleUpload} disabled={loading2}>
-                        {loading2 ? 'Uploading...' : 'Upload'}
-                    </button>
-                </form>
-            </div>
+        <div className="min-h-screen bg-gray-100 p-4">
+            <h1 className="text-3xl font-bold mb-4">Editor Dashboard</h1>
+            <input
+                type="text"
+                placeholder="Search Channels..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 mb-4 border rounded"
+            />
+            {filteredChannels.map(channel => (
+                <>
+                    <div key={channel._id} className="flex justify-between">
+                        <div className="flex">
+                            <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
+                                <div className="flex flex-col justify-center h-full text-xl">{channel.youtuber.channelName[0].toUpperCase()}</div>
+                            </div>
+                            <div className="flex flex-col justify-center h-ful">
+                                <div className='font-bold'>{channel.youtuber.channelName} / {channel.youtuber.channelUrl}</div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col justify-center h-ful">
+                            <button type="button" onClick={() => handleSelectChannel(channel._id)} className="w-full text-[#163300] font-bold bg-[#9fe870] border border-[#9fe870] transition-colors duration-150 ease-in-out text-base rounded-full select-none py-2 px-4">Select Channel</button>
+                        </div>
+                    </div>
+                </>
+            ))}
         </div>
     );
 }

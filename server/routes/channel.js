@@ -1,11 +1,11 @@
 // routes/channel.js
 const express = require('express');
 const router = express.Router();
-const { authenticateEditor } = require('../middleware/authMiddleware');
+const { authenticateYoutuber, authenticateEditor } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
 const Editor = require('../models/Editor');
 
-router.post('/addEditor', authenticateEditor, async (req, res) => {
+router.post('/addEditor', authenticateYoutuber, async (req, res) => {
   const { editorEmail } = req.body;
   try {
     if (req.user.role !== 'YouTuber') {
@@ -19,21 +19,27 @@ router.post('/addEditor', authenticateEditor, async (req, res) => {
 
     let channel = await Channel.findOne({ youtuber: req.user.userId });
     if (!channel) {
-      channel = new Channel({
-        youtubeChannelId: req.user.youtubeChannelId,
-        youtuber: req.user.userId,
-        editors: [editor._id],
-      });
-    } else {
-      if (!channel.editors.includes(editor._id)) {
-        channel.editors.push(editor._id);
-      }
+      return res.status(404).send('Channel not found.');
     }
+
     await channel.save();
     res.send('Editor added successfully.');
   } catch (error) {
     res.status(500).send('Error adding editor.');
   }
 });
+
+router.get('/:id', authenticateEditor, async (req, res) => {
+  try {
+      const channel = await Channel.findById(req.params.id).populate('youtuber', 'channelName channelUrl');
+      if (!channel) {
+          return res.status(404).json({ message: 'Channel not found' });
+      }
+      res.status(200).json(channel);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching channel details' });
+  }
+});
+
 
 module.exports = router;
