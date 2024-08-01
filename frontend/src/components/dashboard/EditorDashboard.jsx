@@ -48,7 +48,7 @@ function EditorDashboard() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 mb-4 border rounded"
             />
-            {filteredChannels.map(channel => (
+            {filteredChannels.map(channel => (  
                 <>
                     <div key={channel._id} className="flex justify-between">
                         <div className="flex">
@@ -60,7 +60,7 @@ function EditorDashboard() {
                             </div>
                         </div>
                         <div className="flex flex-col justify-center h-ful">
-                            <button type="button" onClick={() => handleSelectChannel(channel._id)} className="w-full text-[#163300] font-bold bg-[#9fe870] border border-[#9fe870] transition-colors duration-150 ease-in-out text-base rounded-full select-none py-2 px-4">Select Channel</button>
+                            <button type="button" data-ChannelId={channel._id} onClick={() => handleSelectChannel(channel._id)} className="w-full text-[#163300] font-bold bg-[#9fe870] border border-[#9fe870] transition-colors duration-150 ease-in-out text-base rounded-full select-none py-2 px-4">Select Channel</button>
                         </div>
                     </div>
                 </>

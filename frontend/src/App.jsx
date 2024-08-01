@@ -34,7 +34,7 @@ function App() {
             }
           />
           <Route
-            path="/editor/channel/:channelId"
+            path="/editor/channel/:id"
             element={
               <ProtectedRouteEditor>
                 <ChannelDetails />

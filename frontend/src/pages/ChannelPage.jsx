@@ -13,6 +13,7 @@ const ChannelDetails = () => {
     const [file, setFile] = useState(null);
     const [flow, setFlow] = useState(true);
     const [error, setError] = useState('');
+    const [vdoUploading, setVdoUploading] = useState(false);
 
     useEffect(() => {
         if (loading) {
@@ -25,7 +26,6 @@ const ChannelDetails = () => {
         const fetchChannelDetails = async () => {
             try {
                 const response = await axiosInstance.get(`/channel/${channelId}`);
-                console.log('fetchChannelDetails res:', response)
                 setChannel(response.data);
             } catch (error) {
                 console.error('Error fetching channel details:', error);
@@ -35,7 +35,7 @@ const ChannelDetails = () => {
 
         const fetchPendingVideos = async () => {
             try {
-                const response = await axiosInstance.get(`/video/pending`, { params: { channelId } });
+                const response = await axiosInstance.get(`/video/pending?channelId=${channelId}`);
                 console.log('fetchPendingVideos res:', response)
                 setVideos(response.data);
             } catch (error) {
@@ -56,14 +56,13 @@ const ChannelDetails = () => {
             setError('Please fill all fields and select a file to upload.');
             return;
         }
-
         const formData = new FormData();
         formData.append('file', file);
         formData.append('title', title);
         formData.append('description', description);
         formData.append('channelId', channelId);
         formData.append('editorId', user.userId);
-
+        setVdoUploading(true);
         try {
             const response = await axiosInstance.post('/video/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -77,6 +76,8 @@ const ChannelDetails = () => {
         } catch (error) {
             console.error('Error uploading video:', error);
             setError('Error uploading video');
+        } finally {
+            setVdoUploading(false);
         }
     };
 
@@ -90,8 +91,7 @@ const ChannelDetails = () => {
             {error && <p className="text-red-600">{error}</p>}
             {channel && (
                 <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-                    <h2 className="text-2xl font-bold mb-2">{channel.youtuber.channelName}</h2>
-                    <p className="mb-2">Channel URL: {channel.youtuber.channelUrl}</p>
+                    <h2 className="text-2xl font-bold mb-2">{channel.youtuber.channelName} | {channel.youtuber.channelUrl}</h2>
                 </div>
             )}
             <h2 className="text-2xl font-bold mb-4">Pending Videos</h2>
@@ -128,8 +128,8 @@ const ChannelDetails = () => {
                     required
                     className="w-full p-2 mb-4 border rounded"
                 />
-                <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg">
-                    Upload Video
+                <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg" disabled={vdoUploading}>
+                    {vdoUploading ? 'Uploading Video ...' : 'Upload Video'}
                 </button>
             </form>
         </div>

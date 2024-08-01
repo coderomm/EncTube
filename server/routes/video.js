@@ -13,7 +13,7 @@ const { authenticateEditor, authenticateYoutuber } = require('../middleware/auth
 
 router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
   const { title, description, channelId } = req.body;
-
+  const filePath = req.file.path;
   try {
     const channel = await Channel.findById(channelId);
     if (!channel) {
