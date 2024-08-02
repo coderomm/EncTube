@@ -7,65 +7,71 @@ function YouTuberDashboard() {
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState('');
   const { user, loading } = useContext(AuthContext);
-  const [loading2 , setLoading2] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (loading) {
       return <div>Loading...</div>;
     }
-  
+
     if (!user || user.role !== 'YouTuber') {
       return <Navigate to="/login-youtuber" />;
-    }else {
+    } else {
+      console.log('user:', user)
       fetchPendingVideos();
     }
-  }, [user,loading]);
+  }, [user, loading]);
 
   const fetchPendingVideos = async () => {
-    setLoading2(true);
+    setProcessing(true);
     try {
-      const response = await axiosInstance.get('/vdo/videos/pending');
+      const response = await axiosInstance.get(`/video/youtuber/pending`);
       setVideos(response.data);
     } catch (error) {
       console.error('Error fetching pending videos:', error);
       setError('Error fetching pending videos');
     } finally {
-      setLoading2(false);
+      setProcessing(false);
     }
   };
 
   const handleApprove = async (id) => {
-    setLoading2(true);
+    setProcessing(true);
     try {
-      await axiosInstance.put(`/vdo/video/${id}`, { status: 'Approved' }, { withCredentials: true });
+      await axiosInstance.put(`/video/${id}`, { status: 'Approved' }, { withCredentials: true });
       setVideos(videos.filter(video => video._id !== id));
     } catch (error) {
       console.error('Error approving video:', error);
       setError('Error approving video');
     } finally {
-      setLoading2(false);
+      setProcessing(false);
     }
   };
 
   const handleReject = async (id) => {
-    setLoading2(true);
+    setProcessing(true);
     try {
-      await axiosInstance.put(`/vdo/video/${id}`, { status: 'Rejected' }, { withCredentials: true });
+      await axiosInstance.put(`/video/${id}`, { status: 'Rejected' }, { withCredentials: true });
       setVideos(videos.filter(video => video._id !== id));
     } catch (error) {
       console.error('Error rejecting video:', error);
       setError('Error rejecting video');
     } finally {
-      setLoading2(false);
+      setProcessing(false);
     }
   };
 
   return (
     <div className="p-4">
-      <Link to={'invite-editor'} className="bg-gray-800 text-white hover:text-gray-200 px-3 py-2 rounded">Invite Editor</Link>
+      <div className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-center justify-between flex-wrap">
+        <h2 className="text-2xl font-bold">{user.channelName} | {user.channelUrl}</h2>
+        <Link to={'invite-editor'} className="bg-gray-800 text-white hover:text-gray-200 px-3 py-2 rounded">Invite Editor</Link>
+      </div>
+      
       <div className="my-4 h-0.5 w-full bg-black"></div>
+      <div className="bg-white p-4 rounded-lg shadow-md mt-4">
       <h1 className="text-2xl mb-4">Pending Videos</h1>
-      {loading2 ? (
+      {processing ? (
         <p>Loading...</p>
       ) : error ? (
         <p className="text-red-600">{error}</p>
@@ -81,6 +87,7 @@ function YouTuberDashboard() {
           </div>
         ))
       )}
+      </div>
     </div>
   );
 }

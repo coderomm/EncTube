@@ -8,6 +8,8 @@ function EditorRegister() {
     const [searchParams] = useSearchParams();
     const [email, setEmail] = useState('');
     const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
     const { register } = useContext(AuthContext);
     const navigate = useNavigate()
 
@@ -20,24 +22,19 @@ function EditorRegister() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        try {
-            const response = await register(token, username, email, password);
-            if (response.status === 201) {
-                console.log('editor register res:', response)
-                alert(response.message)
-                navigate('/login-editor')
-            }
-            else {
-                alert('Editor Registration failed')
-                console.error('editor register res:', response)
-            }
-        } catch (error) {
-            console.error('Registration failed', error);
+        setLoading(true);
+        const response = await register(token, username, email, password);
+        setLoading(false);
+        if (response.status === 201) {
+            setMessage(response.message);
+            navigate('/login-editor');
+        } else {
+            setMessage(response.message);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold mb-4">Editor Register</h2>
                 <form>
@@ -64,7 +61,10 @@ function EditorRegister() {
                         placeholder="Password"
                         className="w-full mb-4 px-4 py-2 border rounded-lg"
                     />
-                    <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg" onClick={handleRegister}>Register</button>
+                    <button type="submit" className="bg-gray-800 text-white w-full py-2 rounded-lg" onClick={handleRegister}>
+                        {loading ? 'Processing...' : 'Signup'}
+                    </button>
+                    {message && <p className="text-red-600 mt-4">{message}</p>}
                 </form>
             </div>
         </div>

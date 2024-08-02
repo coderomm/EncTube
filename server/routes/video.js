@@ -9,7 +9,7 @@ const upload = require('../multerConfig');
 const Video = require('../models/Video');
 const Channel = require('../models/Channel');
 const Youtuber = require('../models/Youtuber');
-const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
+const { authenticateEditor, authenticateYoutuber, authenticateBoth } = require('../middleware/authMiddleware');
 
 router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
   const { title, description, channelId } = req.body;
@@ -36,13 +36,6 @@ router.post('/upload', authenticateEditor, upload.single('file'), async (req, re
       return res.status(404).send('YouTuber not found');
     }
 
-    // await sendEmailNotification(
-    //   'New Video Uploaded',
-    //   `A new video titled "${title}" has been uploaded and is pending approval.`,
-    //   youtuber.email,
-    //   video._id
-    // );
-
     const emailPayload = {
       to: youtuber.email,
       subject: 'New Video Uploaded on YT Studio Manager',
@@ -68,20 +61,53 @@ router.post('/upload', authenticateEditor, upload.single('file'), async (req, re
   }
 });
 
-router.get('/pending', authenticateEditor, async (req, res) => {
-  const { channelId } = req.query;
+router.get('/editor/pending', authenticateEditor, async (req, res) => {
+  const userId = req.user.userId;
+  const userRole = req.user.role;
   try {
-    const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
+    let pendingVideos;
+
+    if (userRole === 'Editor') {
+      const { channelId } = req.query;
+      if (!channelId) {
+        return res.status(400).json({ message: 'Channel ID is required' });
+      }
+      pendingVideos = await Video.find({ channel: channelId, editorId: userId, status: 'Pending' });
+    } else {
+      return res.status(403).json({ message: 'Access denied, invalid role' });
+    }
+
     res.status(200).json(pendingVideos);
   } catch (error) {
+    console.error('Error fetching pending videos:', error);
+    res.status(500).json({ message: 'Error fetching pending videos' });
+  }
+});
+
+router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
+  const userId = req.user.userId;
+  const userRole = req.user.role;
+  try {
+    let pendingVideos;
+
+    if (userRole === 'YouTuber') {
+      const channel = await Channel.findOne({ youtuber: userId });
+      if (!channel) {
+        return res.status(404).json({ message: 'Channel not found' });
+      }
+      pendingVideos = await Video.find({ channel: channel._id, status: 'Pending' });
+    } else {
+      return res.status(403).json({ message: 'Access denied, invalid role' });
+    }
+
+    res.status(200).json(pendingVideos);
+  } catch (error) {
+    console.error('Error fetching pending videos:', error);
     res.status(500).json({ message: 'Error fetching pending videos' });
   }
 });
 
 router.put('/:id', authenticateYoutuber, async (req, res) => {
-  if (req.user.role !== 'YouTuber') {
-    return res.status(403).send('Access denied');
-  }
   try {
     const video = await Video.findById(req.params.id);
     if (!video) {
@@ -120,20 +146,10 @@ router.put('/:id', authenticateYoutuber, async (req, res) => {
       await video.save();
     }
 
-    res.send('Video status updated');
+    res.status(200).send('Video status updated');
   } catch (error) {
     res.status(500).send('Error updating video status');
   }
 });
-
-router.get('/channel/:channelId/pending', authenticateEditor, async (req, res) => {
-  try {
-    const videos = await Video.find({ channelId: req.params.channelId, status: 'Pending' });
-    res.status(200).json(videos);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching pending videos' });
-  }
-});
-
 
 module.exports = router;

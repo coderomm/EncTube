@@ -100,4 +100,14 @@ router.get('/channels', authenticateEditor, async (req, res) => {
     }
 });
 
+router.get('/video/pending', authenticateEditor, async (req, res) => {
+    const { channelId } = req.query;
+    try {
+        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
+        res.status(200).json(pendingVideos);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching pending videos' });
+    }
+});
+
 module.exports = router;

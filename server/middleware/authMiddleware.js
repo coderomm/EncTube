@@ -39,7 +39,21 @@ const authenticateYoutuber = (req, res, next) => {
     }
 };
 
+const authenticateBoth = (req, res, next) => {
+    const editorToken = req.cookies.editorToken;
+    const youtuberToken = req.cookies.youtuberToken;
+
+    if (editorToken) {
+        return authenticateEditor(req, res, next);
+    } else if (youtuberToken) {
+        return authenticateYoutuber(req, res, next);
+    } else {
+        return res.status(403).send('Access denied, Authorization token missing');
+    }
+};
+
 module.exports = {
     authenticateEditor,
-    authenticateYoutuber
+    authenticateYoutuber,
+    authenticateBoth
 };

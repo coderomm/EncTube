@@ -35,7 +35,7 @@ const ChannelDetails = () => {
 
         const fetchPendingVideos = async () => {
             try {
-                const response = await axiosInstance.get(`/video/pending?channelId=${channelId}`);
+                const response = await axiosInstance.get(`/video/editor/pending?channelId=${channelId}`);
                 console.log('fetchPendingVideos res:', response)
                 setVideos(response.data);
             } catch (error) {
@@ -48,7 +48,7 @@ const ChannelDetails = () => {
 
         fetchChannelDetails();
         fetchPendingVideos();
-    }, [user, loading, channelId]);
+    }, [user, loading, channelId,vdoUploading]);
 
     const handleUpload = async (e) => {
         e.preventDefault();

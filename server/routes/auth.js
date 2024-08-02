@@ -81,7 +81,7 @@ router.get('/oauth2callback', async (req, res) => {
       await channel.save();
     }
 
-    const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role }, process.env.JWT_SECRET);
+    const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role, channelName: youtuber.channelName, channelUrl: youtuber.channelUrl }, process.env.JWT_SECRET);
 
     res.cookie('youtuberToken', jwtToken, {
       httpOnly: true,
