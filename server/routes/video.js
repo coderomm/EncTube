@@ -2,14 +2,25 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
-const { OAuth2Client } = require('google-auth-library');
-const oAuth2Client = new OAuth2Client(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
 const axios = require('axios');
 const upload = require('../multerConfig');
 const Video = require('../models/Video');
 const Channel = require('../models/Channel');
 const Youtuber = require('../models/Youtuber');
-const { authenticateEditor, authenticateYoutuber, authenticateBoth } = require('../middleware/authMiddleware');
+const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
+const mongoose = require('mongoose');
+
+const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
+const OAUTH2_CLIENT_SECRET = process.env.CLIENT_SECRET;
+const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URL;
+
+const oAuth2Client = new OAuth2(
+  OAUTH2_CLIENT_ID,
+  OAUTH2_CLIENT_SECRET,
+  OAUTH2_REDIRECT_URL
+);
 
 router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
   const { title, description, channelId } = req.body;
@@ -72,7 +83,7 @@ router.get('/editor/pending', authenticateEditor, async (req, res) => {
       if (!channelId) {
         return res.status(400).json({ message: 'Channel ID is required' });
       }
-      pendingVideos = await Video.find({ channel: channelId, editorId: userId, status: 'Pending' });
+      pendingVideos = await Video.find({ channelId: channelId, editorId: userId, status: 'Pending' });
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }
@@ -95,7 +106,7 @@ router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
       if (!channel) {
         return res.status(404).json({ message: 'Channel not found' });
       }
-      pendingVideos = await Video.find({ channel: channel._id, status: 'Pending' });
+      pendingVideos = await Video.find({ channelId: channel._id, status: 'Pending' });
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }
@@ -108,16 +119,23 @@ router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
 });
 
 router.put('/:id', authenticateYoutuber, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    const video = await Video.findById(req.params.id);
+    const video = await Video.findById(req.params.id).session(session);
     if (!video) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).send('Video not found');
     }
     video.status = req.body.status;
-    await video.save();
-
     if (video.status === 'Approved') {
-      const youtuber = await Youtuber.findById(video.youtuberId);
+      const youtuber = await Youtuber.findById(video.youtuberId).session(session);
+      if (!youtuber) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).send('Youtuber not found');
+      }
       oAuth2Client.setCredentials({
         access_token: youtuber.accessToken,
         refresh_token: youtuber.refreshToken
@@ -143,11 +161,15 @@ router.put('/:id', authenticateYoutuber, async (req, res) => {
       });
 
       video.youtubeVideoId = response.data.id;
-      await video.save();
     }
-
+    await video.save({ session });
+    await session.commitTransaction();
+    session.endSession();
     res.status(200).send('Video status updated');
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Error updating video status:', error);
     res.status(500).send('Error updating video status');
   }
 });

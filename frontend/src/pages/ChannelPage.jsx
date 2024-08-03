@@ -48,7 +48,7 @@ const ChannelDetails = () => {
 
         fetchChannelDetails();
         fetchPendingVideos();
-    }, [user, loading, channelId,vdoUploading]);
+    }, [user, loading, channelId, vdoUploading]);
 
     const handleUpload = async (e) => {
         e.preventDefault();
@@ -86,52 +86,59 @@ const ChannelDetails = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4">
-            <h1 className="text-3xl font-bold mb-4">Channel Details</h1>
-            {error && <p className="text-red-600">{error}</p>}
+        <div className="my-8 container mx-auto">
+            {error && <p className="bg-white p-4 rounded-lg shadow-md mb-4 text-red-600">{error}</p>}
             {channel && (
                 <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-                    <h2 className="text-2xl font-bold mb-2">{channel.youtuber.channelName} | {channel.youtuber.channelUrl}</h2>
+                    <h2 className="text-2xl font-bold mb-2">Channel - {channel.youtuber.channelName} | <span className='text-xl text-sky-500'>{channel.youtuber.channelUrl}</span></h2>
                 </div>
             )}
-            <h2 className="text-2xl font-bold mb-4">Pending Videos</h2>
-            {videos.length === 0 ? (
-                <p>No pending videos</p>
-            ) : (
-                videos.map((video) => (
-                    <div key={video._id} className="bg-white p-4 rounded-lg shadow-md mb-4">
-                        <h3 className="text-xl font-bold">{video.title}</h3>
-                        <p>{video.description}</p>
+            <div className="bg-white rounded-lg shadow-md mb-4 container mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white p-6 rounded shadow">
+                        <h2 className="text-2xl font-bold mb-4">Pending Videos: {videos.length}</h2>
+                        <hr className="border-black border-1"></hr>
+                        {videos.length === 0 ? ('') : (
+                            videos.map((video) => (
+                                <div key={video._id} className="bg-white p-4 rounded-lg shadow-md mb-4">
+                                    <h3 className="text-xl font-bold">{video.title}</h3>
+                                    <p>{video.description}</p>
+                                </div>
+                            ))
+                        )}
                     </div>
-                ))
-            )}
-            <form className="bg-white p-4 rounded-lg shadow-md" onSubmit={handleUpload}>
-                <h2 className="text-2xl font-bold mb-4">Upload Video</h2>
-                <input
-                    type="text"
-                    placeholder="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="w-full p-2 mb-4 border rounded"
-                />
-                <textarea
-                    placeholder="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                    className="w-full p-2 mb-4 border rounded"
-                ></textarea>
-                <input
-                    type="file"
-                    onChange={(e) => setFile(e.target.files[0])}
-                    required
-                    className="w-full p-2 mb-4 border rounded"
-                />
-                <button type="submit" className="bg-blue-500 text-white w-full py-2 rounded-lg" disabled={vdoUploading}>
-                    {vdoUploading ? 'Uploading Video ...' : 'Upload Video'}
-                </button>
-            </form>
+                    <div className="bg-white p-6 rounded shadow">
+
+                        <form className="bg-white p-4 rounded-lg shadow-md" onSubmit={handleUpload}>
+                            <h2 className="text-2xl font-bold mb-4">Upload Video</h2>
+                            <input
+                                type="text"
+                                placeholder="Title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                                className="w-full p-2 mb-4 border rounded"
+                            />
+                            <textarea
+                                placeholder="Description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                                className="w-full p-2 mb-4 border rounded"
+                            ></textarea>
+                            <input
+                                type="file"
+                                onChange={(e) => setFile(e.target.files[0])}
+                                required
+                                className="w-full p-2 mb-4 border rounded"
+                            />
+                            <button type="submit" className="bg-gray-800 text-white w-full py-2 rounded-lg" disabled={vdoUploading}>
+                                {vdoUploading ? 'Uploading Video ...' : 'Upload Video'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
