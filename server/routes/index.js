@@ -4,7 +4,7 @@ const authRouter = require('./auth');
 const channelRouter = require('./channel');
 const editorRouter = require('./editor');
 const invitationRouter = require('./invitation');
-const youtubeRouter = require('./youtube');
+const categoriesRouter = require('./categories');
 
 const router = express.Router();
 
@@ -12,6 +12,6 @@ router.use('/auth', authRouter);
 router.use('/channel', channelRouter);
 router.use('/editor', editorRouter);
 router.use('/invitation', invitationRouter);
-router.use('/youtube', youtubeRouter);
+router.use('/youtube', categoriesRouter);
 
 module.exports = router;

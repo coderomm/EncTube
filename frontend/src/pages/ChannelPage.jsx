@@ -59,10 +59,9 @@ const ChannelDetails = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axiosInstance.get('/youtube/categories');
-                console.log('fetchCategories res:', response)
                 setCategories(response.data);
-            } catch (message) {
-                console.error('Error fetching categories:', message);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
             }
         };
         fetchCategories();
