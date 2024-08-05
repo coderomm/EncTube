@@ -8,16 +8,27 @@ const Invitation = require('../models/Invitation');
 const { authenticateYoutuber } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
 const axios = require('axios');
+const { z } = require('zod');
+const mongoose = require('mongoose');
+
+const invitationSchema = z.object({
+    editorEmail: z.string().email(),
+});
 
 router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
     const { editorEmail } = req.body;
+    const validationResult = invitationSchema.safeParse({ editorEmail });
+    if (!validationResult.success) {
+        return res.status(400).send('Invalid email address');
+    }
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const editor = await Editor.findOne({ email: editorEmail, role: 'Editor' });
-
+        const editor = await Editor.findOne({ email: editorEmail, role: 'Editor' }).session(session);
         const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+        const expiresAt = Date.now() + 2 * 60 * 60 * 1000;
         const youtuberId = req.user.userId;
-        await Invitation.create({ editorEmail, token, expiresAt, youtuberId });
+        await Invitation.create([{ editorEmail, token, expiresAt, youtuberId }], { session });
 
         let invitationLink;
         if (editor) {
@@ -25,7 +36,6 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
         } else {
             invitationLink = `${process.env.FRONTEND_URL}/register-editor?email=${editorEmail}&token=${token}`;
         }
-        console.log('invitationLink: ', invitationLink)
         // const response = await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register/confirm using the following link: ${invitationLink}`);
 
         const emailPayload = {
@@ -34,32 +44,34 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
             text: `Please register/confirm using the following link: ${invitationLink}`
         };
         await axios.post('https://send-anonymous-mail.onrender.com/api/v1/send-email', emailPayload);
-
-        res.status(200).json({
-            invitationLink,
-            message: 'Invitation sent successfully.',
-            status: 200
-        });
-
+        await session.commitTransaction();
+        res.status(200).send('Invitation sent successfully!');
     } catch (error) {
+        await session.abortTransaction();
+        console.error('Error sending invitation:', error);
         res.status(500).send('Error sending invitation.');
+    } finally {
+        session.endSession();
     }
 });
 
 router.post('/confirmChannel', async (req, res) => {
     const { token } = req.body;
-    const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
-
-    if (!invitation) {
-        return res.status(400).send('Invalid or expired token.');
+    if (!token) {
+        return res.status(400).json({ message: 'Invalid request data' });
     }
 
     try {
+        const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
+        if (!invitation) {
+            return res.status(400).json({ message: 'Invalid or expired token.' });
+        }
+
         const editor = await Editor.findOne({ email: invitation.editorEmail });
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
 
         if (!editor || !channel) {
-            return res.status(404).send('Editor or Channel not found.');
+            return res.status(404).json({ message: 'Editor or Channel not found.' });
         }
 
         // Associate channel with editor
@@ -73,19 +85,11 @@ router.post('/confirmChannel', async (req, res) => {
             channel.editors.push(editor._id);
             await channel.save();
         }
-
         await Invitation.deleteOne({ _id: invitation._id });
-
-        console.log('Channel confirmed successfully.');
-        res.status(200).json({
-            status: 200,
-            message: 'Channel confirmed successfully.',
-            editor,
-            channel
-        });
+        res.status(200).json({ message: 'Channel confirmed successfully.' });
     } catch (error) {
-        console.log('Error confirming channel.');
-        res.status(500).send('Error confirming channel.');
+        console.error('Error confirming channel:', error);
+        res.status(500).json({ message: 'Error confirming channel.' });
     }
 });
 

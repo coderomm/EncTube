@@ -23,13 +23,19 @@ function EditorRegister() {
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const response = await register(token, username, email, password);
-        setLoading(false);
-        if (response.status === 201) {
-            setMessage(response.message);
-            navigate('/login-editor');
-        } else {
-            setMessage(response.message);
+        try {
+            const response = await register(token, username, email, password);
+            if (response.status === 201) {
+                setMessage(response.message);
+                navigate('/login-editor');
+            } else {
+                setMessage(response.message);
+            }
+        } catch (error) {
+            console.error('Registration failed:', error);
+            setMessage('Registration failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 

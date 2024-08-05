@@ -7,24 +7,40 @@ const Invitation = require('../models/Invitation');
 const Channel = require('../models/Channel');
 const jwt = require('jsonwebtoken');
 const { authenticateEditor } = require('../middleware/authMiddleware');
+const zod = require('zod');
+
+const registerSchema = zod.object({
+    token: zod.string(),
+    username: zod.string().min(3),
+    password: zod.string().min(6)
+});
+
+const loginSchema = zod.object({
+    email: zod.string().email('Email required'),
+    password: zod.string().min(6)
+});
 
 router.post('/register', async (req, res) => {
+    const validationResult = registerSchema.safeParse(req.body);
+    if (!validationResult.success) {
+        return res.status(400).json({ message: 'Invalid input data', errors: validationResult.error.errors });
+    }
+
     const { token, username, password } = req.body;
     const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
     if (!invitation) {
         return res.status(400).send('Invalid or expired token.');
     }
+
     try {
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
         if (!channel) {
-            console.error('Error registering editor. Channel not found.');
             return res.status(404).send('Channel not found.');
         }
 
         let editor = await Editor.findOne({ email: invitation.editorEmail });
         if (editor) {
             editor.channels = [...new Set([...editor.channels, channel._id])];
-            await editor.save();
         } else {
             const hashedPassword = await bcrypt.hash(password, 10);
             editor = new Editor({
@@ -34,23 +50,26 @@ router.post('/register', async (req, res) => {
                 role: 'Editor',
                 channels: [channel._id]
             });
-            await editor.save();
         }
+        await editor.save();
         channel.editors.push(editor._id);
         await channel.save();
         await Invitation.deleteOne({ _id: invitation._id });
 
         res.status(201).json({
-            status: 201,
-            message: 'Editor register successful!',
-            editor
+            message: 'Editor Registration Successful',
         });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
 router.post('/login', async (req, res) => {
+    const validationResult = loginSchema.safeParse(req.body);
+    if (!validationResult.success) {
+        return res.status(400).json({ message: 'Invalid input data', errors: validationResult.error.errors });
+    }
     const { email, password } = req.body;
     try {
         const editor = await Editor.findOne({ email });
@@ -63,15 +82,14 @@ router.post('/login', async (req, res) => {
                 maxAge: 3600000,
             });
             res.status(200).json({
-                status: 200,
-                message: 'Editor login successful!',
-                editor
+                message: 'Editor Login Successful',
+                user: editor
             });
         } else {
             res.status(400).json({ message: 'Invalid credentials' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
 

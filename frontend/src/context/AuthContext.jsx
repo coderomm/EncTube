@@ -16,10 +16,8 @@ const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await axiosInstance.get('/auth/checkAuth');
-      // console.log('response.data.user: ', response.data.user)
       if (response.data.user) {
         setUser(response.data.user);
-        // return response.data.user;
       } else {
         setUser(null);
       }
@@ -34,40 +32,25 @@ const AuthProvider = ({ children }) => {
   const register = async (token, username, email, password) => {
     try {
       const response = await axiosInstance.post('/editor/register', { token, username, email, password });
-      if (response.data.status === 201) {
-        // console.log('Editor Registration Successful', response)
-        // alert('Editor Registration Successful');
-        // return response.data;
-        return { status: 201, message: 'Editor Registration Successful' };
-      } else {
-        // console.log('Editor Registration failed', response);
-        // alert('Editor Registration failed')
-        // return response;
-        return { status: response.data.status, message: 'Editor Registration failed' };
-      }
+      return { status: response.status, message: response.data.message };
     } catch (error) {
       console.error('Editor Registration failed', error);
-      // alert('Editor Registration failed')
-      return { status: 500, message: 'Editor Registration failed' };
+      return { status: error.response?.status || 500, message: error.response?.data?.message || 'Editor Registration failed' };
     }
   };
 
   const login = async (email, password) => {
     try {
       const response = await axiosInstance.post('/editor/login', { email, password });
-      if (response.data.status === 200) {
-        setUser(response.data.editor)
-        // console.log(`${response.data.message}:${response}`)
-        // alert(response.data.message)
-        // return response.data;
-        return { status: 200, message: 'Editor Login Successful' };
+      if (response.status === 200) {
+        setUser(response.data.user)
+        return { status: response.status, message: response.data.message };
       } else {
         return { status: response.data.status, message: 'Editor Login failed' };
       }
     } catch (error) {
       console.error('Editor Login failed', error);
-      // alert('Editor Login failed');
-      return { status: 500, message: 'Editor Login failed' };
+      return { status: error.response?.status || 500, message: error.response?.data?.message || 'Editor Login failed' };
     }
   };
 
@@ -75,7 +58,6 @@ const AuthProvider = ({ children }) => {
     try {
       await axiosInstance.post('/editor/logout');
       setUser(null);
-      // alert('Editor logout successful')
       navigate('/home');
     } catch (error) {
       console.error('Logout failed', error);

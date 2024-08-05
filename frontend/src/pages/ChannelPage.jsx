@@ -136,144 +136,144 @@ const ChannelDetails = () => {
                     <h3 className='text-xl font-bold'> {channel.youtuber.channelName} | <span className='text-xl text-sky-500'>{channel.youtuber.channelUrl}</span></h3>
                 </div>
             )}
-            <div className="mb-4">
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-4">Pending Videos: {videos.length}</h2>
-                        <hr className="border-black border-1"></hr>
-                        {videos.length === 0 ? ('') : (
-                            videos.map((video) => (
-                                <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">
-                                    <h3 className="text-xl font-bold">{video.title}</h3>
-                                    <p>{video.description}</p>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
-                        <form onSubmit={handleUpload}>
-                            <h2 className="text-2xl font-bold mb-4">Enter video data...</h2>
-                            <input
-                                type="text"
-                                placeholder="Title"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            />
-                            <textarea
-                                placeholder="Description"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                required
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            ></textarea>
-                            <input
-                                type="text"
-                                placeholder="Tags (comma separated)"
-                                value={tags}
-                                onChange={(e) => setTags(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Default Language (e.g., 'en')"
-                                value={defaultLanguage}
-                                onChange={(e) => setDefaultLanguage(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            />
-                            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-3">
-                                <select
-                                    value={categoryId}
-                                    onChange={(e) => setCategoryId(e.target.value)}
-                                    required
-                                    className="w-full mb-4 px-4 py-2 border rounded-lg"
-                                >
-                                    <option value="">Select Category</option>
-                                    {categories.map(category => (
-                                        <option key={category.id} value={category.id}>
-                                            {category.title}
-                                        </option>
-                                    ))}
-                                </select>
-                                <select
-                                    value={privacyStatus}
-                                    onChange={(e) => setPrivacyStatus(e.target.value)}
-                                    required
-                                    className="w-full mb-4 px-4 py-2 border rounded-lg"
-                                >
-                                    <option value="private">Private</option>
-                                    <option value="public">Public</option>
-                                    <option value="unlisted">Unlisted</option>
-                                </select>
+            <div className="mb-4 grid grid-cols-1 gap-4">
+                <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
+                    <h2 className="text-2xl font-bold mb-4 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                    </svg> Pending Videos - {videos.length}</h2>
+                    <hr className="border-black border-1 mb-4"></hr>
+                    {videos.length === 0 ? ('') : (
+                        videos.map((video) => (
+                            <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">
+                                <h3 className="text-xl font-bold">{video.title}</h3>
+                                <p className='mb-3'>{video.description}</p>
                             </div>
+                        ))
+                    )}
+                </div>
+                <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
+                    <form onSubmit={handleUpload}>
+                        <h2 className="text-2xl font-bold mb-4">Enter video data...</h2>
+                        <input
+                            type="text"
+                            placeholder="Title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        />
+                        <textarea
+                            placeholder="Description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            required
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        ></textarea>
+                        <input
+                            type="text"
+                            placeholder="Tags (comma separated)"
+                            value={tags}
+                            onChange={(e) => setTags(e.target.value)}
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Default Language (e.g., 'en')"
+                            value={defaultLanguage}
+                            onChange={(e) => setDefaultLanguage(e.target.value)}
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-3">
                             <select
-                                value={license}
-                                onChange={(e) => setLicense(e.target.value)}
+                                value={categoryId}
+                                onChange={(e) => setCategoryId(e.target.value)}
                                 required
                                 className="w-full mb-4 px-4 py-2 border rounded-lg"
                             >
-                                <option value="youtube">YouTube License</option>
-                                <option value="creativeCommon">Creative Commons</option>
+                                <option value="">Select Category</option>
+                                {categories.map(category => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.title}
+                                    </option>
+                                ))}
                             </select>
-                            <div className="grid grid-cols-1 md:grid-cols-4 md:gap-3">
-                                <label className="flex items-center mb-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={notifySubscribers}
-                                        onChange={(e) => setNotifySubscribers(e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Notify Subscribers
-                                </label>
-                                <label className="flex items-center mb-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={embeddable}
-                                        onChange={(e) => setEmbeddable(e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Embeddable
-                                </label>
-                                <label className="flex items-center mb-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={publicStatsViewable}
-                                        onChange={(e) => setPublicStatsViewable(e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Public Stats Viewable
-                                </label>
-                                <label className="flex items-center mb-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={selfDeclaredMadeForKids}
-                                        onChange={(e) => setSelfDeclaredMadeForKids(e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Made for Kids
-                                </label>
-                            </div>
-                            <input
-                                type="datetime-local"
-                                value={publishAt}
-                                onChange={(e) => setPublishAt(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            />
-                            <input
-                                type="file"
-                                onChange={(e) => setFile(e.target.files[0])}
+                            <select
+                                value={privacyStatus}
+                                onChange={(e) => setPrivacyStatus(e.target.value)}
                                 required
                                 className="w-full mb-4 px-4 py-2 border rounded-lg"
-                            />
-                            <button type="submit" className={`bg-gray-800 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 border-none hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
-                                {uploading ? 'Uploading ...' : 'Upload'}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
+                            >
+                                <option value="private">Private</option>
+                                <option value="public">Public</option>
+                                <option value="unlisted">Unlisted</option>
+                            </select>
+                        </div>
+                        <select
+                            value={license}
+                            onChange={(e) => setLicense(e.target.value)}
+                            required
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        >
+                            <option value="youtube">YouTube License</option>
+                            <option value="creativeCommon">Creative Commons</option>
+                        </select>
+                        <div className="grid grid-cols-1 md:grid-cols-4 md:gap-3">
+                            <label className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    checked={notifySubscribers}
+                                    onChange={(e) => setNotifySubscribers(e.target.checked)}
+                                    className="mr-2"
+                                />
+                                Notify Subscribers
+                            </label>
+                            <label className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    checked={embeddable}
+                                    onChange={(e) => setEmbeddable(e.target.checked)}
+                                    className="mr-2"
+                                />
+                                Embeddable
+                            </label>
+                            <label className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    checked={publicStatsViewable}
+                                    onChange={(e) => setPublicStatsViewable(e.target.checked)}
+                                    className="mr-2"
+                                />
+                                Public Stats Viewable
+                            </label>
+                            <label className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    checked={selfDeclaredMadeForKids}
+                                    onChange={(e) => setSelfDeclaredMadeForKids(e.target.checked)}
+                                    className="mr-2"
+                                />
+                                Made for Kids
+                            </label>
+                        </div>
+                        <input
+                            type="datetime-local"
+                            value={publishAt}
+                            onChange={(e) => setPublishAt(e.target.value)}
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        />
+                        <input
+                            type="file"
+                            onChange={(e) => setFile(e.target.files[0])}
+                            required
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                        />
+                        <button type="submit" className={`bg-gray-800 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
+                            {uploading ? 'Uploading ...' : 'Upload'}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                            </svg>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div >

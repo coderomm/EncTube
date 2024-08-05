@@ -45,17 +45,20 @@ function EditorDashboard() {
     }
 
     return (
-        <div className="min-h-screen p-4">
-            <h1 className="text-3xl font-bold mb-4">Editor Dashboard</h1>
-            <input
-                type="text"
-                placeholder="Search Channels..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full p-2 mb-4 border rounded"
-            />
-            {error && <p className="text-red-600">{error}</p>}
-            {filteredChannels.map(channel => (
+        <div className="my-8 container mx-auto px-4 md:px-0">
+            <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
+                <h1 className="text-3xl font-bold mb-4">Editor Dashboard</h1>
+                <input
+                    type="text"
+                    placeholder="Search Channels..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full p-2 mb-4 border rounded drop-shadow-xl"
+                />
+                {error && <p className="text-red-600">{error}</p>}
+                <hr className="border-black border-1 mb-4"></hr>
+
+                {filteredChannels.map(channel => (
                     <div key={channel._id} className="flex justify-between">
                         <div className="flex">
                             <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
@@ -66,10 +69,14 @@ function EditorDashboard() {
                             </div>
                         </div>
                         <div className="flex flex-col justify-center h-ful">
-                            <button type="button" onClick={() => handleSelectChannel(channel._id)} className="w-full text-[#163300] font-bold bg-[#9fe870] border border-[#9fe870] transition-colors duration-150 ease-in-out text-base rounded-full select-none py-2 px-4">Select Channel</button>
+                            <button type="button" onClick={() => handleSelectChannel(channel._id)} className="bg-gray-800 drop-shadow-2xl text-white w-full py-2 px-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900">Select <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+                            </svg>
+                            </button>
                         </div>
                     </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }
