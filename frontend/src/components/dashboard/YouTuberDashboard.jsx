@@ -30,7 +30,7 @@ function YouTuberDashboard() {
     }
 
     if (!user || user.role !== 'YouTuber') {
-      return <Navigate to="/login-youtuber" />;
+      return <Navigate to="/youtuber/login" />;
     } else {
       fetchPendingVideos();
     }

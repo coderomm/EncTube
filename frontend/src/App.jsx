@@ -11,7 +11,9 @@ import ProtectedRouteEditor from './components/ProtectedRouteEditor';
 import ProtectedRouteYouTuber from './components/ProtectedRouteYoutuber';
 import InvitationForm from './components/InvitationForm';
 import ConfirmChannel from './pages/ConfirmChannel';
-import ChannelDetails from './pages/ChannelPage';
+import VideoUpload from './pages/VideoUpload';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -20,12 +22,14 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login-youtuber" element={<YouTuberLogin />} />
-          <Route path="/login-editor" element={<EditorLogin />} />
-          <Route path="/register-editor" element={<EditorRegister />} />
+          <Route path="/youtuber/login" element={<YouTuberLogin />} />
+          <Route path="/editor/login" element={<EditorLogin />} />
+          <Route path="/editor/signup" element={<EditorRegister />} />
           <Route path="/editor/confirm-channel" element={<ConfirmChannel />} />
+          <Route path="/editor/forgot-password" element={<ForgotPassword />} />
+          <Route path="/editor/reset-password" element={<ResetPassword />} />
           <Route
-            path="/editor-dashboard"
+            path="/editor/dashboard"
             element={
               <ProtectedRouteEditor>
                 <EditorDashboard />
@@ -36,12 +40,12 @@ function App() {
             path="/editor/channel/:id"
             element={
               <ProtectedRouteEditor>
-                <ChannelDetails />
+                <VideoUpload />
               </ProtectedRouteEditor>
             }
           />
           <Route
-            path="/youtuber-dashboard"
+            path="/youtuber/dashboard"
             element={
               <ProtectedRouteYouTuber>
                 <YouTuberDashboard />
@@ -49,7 +53,7 @@ function App() {
             }
           />
           <Route
-            path="youtuber-dashboard/invite-editor"
+            path="/youtuber/dashboard/invite-editor"
             element={
               <ProtectedRouteYouTuber>
                 <InvitationForm />

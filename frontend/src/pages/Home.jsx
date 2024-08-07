@@ -6,8 +6,8 @@ function Home() {
     <div className="flex flex-col items-center justify-center h-screen">
       <h2 className="text-2xl mb-4">Welcome to YouTube Uploader</h2>
       <div className="flex">
-        <Link to="/login-youtuber" className="btn">YouTuber Login</Link>
-        <Link to="/login-editor" className="btn ml-4">Editor Login</Link>
+        <Link to="/youtuber/login" className="btn">YouTuber Login</Link>
+        <Link to="/editor/login" className="btn ml-4">Editor Login</Link>
       </div>
     </div>
   );

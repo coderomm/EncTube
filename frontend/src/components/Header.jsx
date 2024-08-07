@@ -7,8 +7,8 @@ function Header() {
         <h1 className="text-xl font-bold">YT Studio</h1>
         <nav className='flex items-center justify-center flex-wrap gap-2'>
           <Link to="/" className="bg-white text-gray-800 px-2 py-1 rounded">Home</Link>
-          <Link to="/youtuber-dashboard" className="bg-white text-gray-800 px-2 py-1 rounded">YouTuber</Link>
-          <Link to="/editor-dashboard" className="bg-white text-gray-800 px-2 py-1 rounded">Editor</Link>
+          <Link to="/youtuber/dashboard" className="bg-white text-gray-800 px-2 py-1 rounded">YouTuber</Link>
+          <Link to="/editor/dashboard" className="bg-white text-gray-800 px-2 py-1 rounded">Editor</Link>
         </nav>
       </div>  
     </header>

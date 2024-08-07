@@ -17,7 +17,7 @@ const ConfirmChannel = () => {
                 setMessage(response.data.message);
                 setStatus('success');
                 setTimeout(() => {
-                    navigate('/editor-dashboard');
+                    navigate('/editor/dashboard');
                 }, 2500);
             } else {
                 setMessage(response.data.message);
@@ -44,7 +44,7 @@ const ConfirmChannel = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center">
-            <div className="container mx-auto my-8 px-4 md:px-0">
+            <div className="container mx-auto my-8 px-4 md:px-0 w-full md:w-2/3 lg:w-1/2">
                 <div className="bg-white p-16 flex items-center justify-center flex-col text-center rounded-lg drop-shadow-2xl">
                     <h2 className="text-xl font-bold mb-4 flex items-center justify-between gap-2">
                         {status === 'success'
