@@ -87,9 +87,9 @@ router.get('/oauth2callback', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
-      maxAge: 3600000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.redirect(`${process.env.FRONTEND_URL}/youtuber-dashboard`);
+    res.redirect(`${process.env.FRONTEND_URL}/youtuber/dashboard`);
   } catch (error) {
     console.error('Error during OAuth callback:', error);
     res.status(500).send('Authentication failed');

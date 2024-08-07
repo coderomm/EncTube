@@ -90,7 +90,7 @@ router.post('/login', async (req, res) => {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'Strict',
-                maxAge: 3600000,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             });
             res.status(200).json({
                 message: 'Editor Login Successful',
@@ -160,7 +160,7 @@ router.post('/forgot-password', async (req, res) => {
             text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.
 
                Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:
-               
+
                ${resetUrl}`
         };
 
