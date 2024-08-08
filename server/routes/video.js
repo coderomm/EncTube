@@ -25,7 +25,7 @@ const oAuth2Client = new OAuth2(
   OAUTH2_REDIRECT_URL
 );
 
-router.post('/upload', authenticateEditor, upload.single('file'), async (req, res) => {
+router.post('/editor/upload', authenticateEditor, upload.single('file'), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -211,7 +211,29 @@ router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
   }
 });
 
-router.put('/:id', authenticateYoutuber, async (req, res) => {
+router.get('/youtuber/pending/:id', authenticateYoutuber, async (req, res) => {
+  const userId = req.user.userId;
+  const userRole = req.user.role;
+  try {
+    let video;
+
+    if (userRole === 'YouTuber') {
+      const channel = await Channel.findOne({ youtuber: userId });
+      if (!channel) {
+        return res.status(404).json({ message: 'Channel not found' });
+      }
+      video = await Video.find({ channelId: channel._id, _id: req.params.id });
+    } else {
+      return res.status(403).json({ message: 'Access denied, invalid role' });
+    }
+    res.status(200).json(video);
+  } catch (error) {
+    console.error('Error fetching pending video:', error);
+    res.status(500).json({ message: 'Error fetching pending video' });
+  }
+});
+
+router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {

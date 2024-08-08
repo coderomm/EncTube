@@ -3,7 +3,7 @@ import axiosInstance from '../utils/AxiosInstance';
 import { useParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
-const VideoUpload = () => {
+const AddVideo = () => {
     const { id: channelId } = useParams();
     const { user, loading } = useContext(AuthContext);
     const [channel, setChannel] = useState(null);
@@ -14,12 +14,12 @@ const VideoUpload = () => {
     const [categoryId, setCategoryId] = useState('');
     const [defaultLanguage, setDefaultLanguage] = useState('');
     const [privacyStatus, setPrivacyStatus] = useState('private');
-    const [notifySubscribers, setNotifySubscribers] = useState(true);
-    const [embeddable, setEmbeddable] = useState(true);
+    const [notifySubscribers, setNotifySubscribers] = useState(false);
+    const [embeddable, setEmbeddable] = useState(false);
     const [license, setLicense] = useState('youtube');
-    const [publicStatsViewable, setPublicStatsViewable] = useState(true);
+    const [publicStatsViewable, setPublicStatsViewable] = useState(false);
     const [publishAt, setPublishAt] = useState('');
-    const [selfDeclaredMadeForKids, setSelfDeclaredMadeForKids] = useState(false);
+    const [selfDeclaredMadeForKids, setSelfDeclaredMadeForKids] = useState(true);
     const [categories, setCategories] = useState([]);
     const [file, setFile] = useState(null);
     const [going, setGoing] = useState(true);
@@ -44,7 +44,7 @@ const VideoUpload = () => {
             }
         };
 
-        const fetchPendingVideos = async () => {
+        const fetchPendingVideo = async () => {
             try {
                 const response = await axiosInstance.get(`/video/editor/pending?channelId=${channelId}`);
                 setVideos(response.data);
@@ -66,7 +66,7 @@ const VideoUpload = () => {
         };
         fetchCategories();
         fetchChannelDetails();
-        fetchPendingVideos();
+        fetchPendingVideo();
     }, [user, loading, channelId, uploading]);
 
     const handleUpload = async (e) => {
@@ -83,17 +83,18 @@ const VideoUpload = () => {
         formData.append('categoryId', categoryId);
         formData.append('defaultLanguage', defaultLanguage);
         formData.append('privacyStatus', privacyStatus);
-        formData.append('notifySubscribers', notifySubscribers);
-        formData.append('embeddable', embeddable);
         formData.append('license', license);
-        formData.append('publicStatsViewable', publicStatsViewable);
-        formData.append('publishAt', publishAt);
-        formData.append('selfDeclaredMadeForKids', selfDeclaredMadeForKids);
+        if (privacyStatus !== 'private') {
+            formData.append('publicStatsViewable', publicStatsViewable);
+            formData.append('publishAt', publishAt);
+            formData.append('notifySubscribers', notifySubscribers);
+            formData.append('embeddable', embeddable);
+        }
         formData.append('file', file);
         formData.append('channelId', channelId);
         formData.append('editorId', user.userId);
         try {
-            const response = await axiosInstance.post('/video/upload', formData, {
+            const response = await axiosInstance.post('/video/editor/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setVideos([...videos, response.data]);
@@ -116,7 +117,9 @@ const VideoUpload = () => {
             setMessage('Error uploading video');
         } finally {
             setUploading(false);
-            setMessage('');
+            setTimeout(() => {
+                setMessage('')
+            }, 3000)
         }
     };
 
@@ -126,7 +129,6 @@ const VideoUpload = () => {
 
     return (
         <div className="my-8 container mx-auto px-4 md:px-0">
-            {message && <p className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4 text-red-600">{message}</p>}
             {channel && (
                 <div className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4 sm:flex items-center justify-start ">
                     <h2 className="text-2xl font-bold mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -199,7 +201,15 @@ const VideoUpload = () => {
                             </select>
                             <select
                                 value={privacyStatus}
-                                onChange={(e) => setPrivacyStatus(e.target.value)}
+                                onChange={(e) => {
+                                    setPrivacyStatus(e.target.value)
+                                    if (e.target.value === 'private') {
+                                        setPublicStatsViewable(false);
+                                        setPublishAt('');
+                                        setNotifySubscribers(false)
+                                        setEmbeddable(false)
+                                    }
+                                }}
                                 required
                                 className="w-full mb-4 px-4 py-2 border rounded-lg"
                             >
@@ -224,6 +234,7 @@ const VideoUpload = () => {
                                     checked={notifySubscribers}
                                     onChange={(e) => setNotifySubscribers(e.target.checked)}
                                     className="mr-2"
+                                    disabled={privacyStatus === 'private'}
                                 />
                                 Notify Subscribers
                             </label>
@@ -233,6 +244,7 @@ const VideoUpload = () => {
                                     checked={embeddable}
                                     onChange={(e) => setEmbeddable(e.target.checked)}
                                     className="mr-2"
+                                    disabled={privacyStatus === 'private'}
                                 />
                                 Embeddable
                             </label>
@@ -242,6 +254,7 @@ const VideoUpload = () => {
                                     checked={publicStatsViewable}
                                     onChange={(e) => setPublicStatsViewable(e.target.checked)}
                                     className="mr-2"
+                                    disabled={privacyStatus === 'private'}
                                 />
                                 Public Stats Viewable
                             </label>
@@ -255,12 +268,15 @@ const VideoUpload = () => {
                                 Made for Kids
                             </label>
                         </div>
+                        <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Select Date & Time To Schedule</label>
                         <input
                             type="datetime-local"
                             value={publishAt}
                             onChange={(e) => setPublishAt(e.target.value)}
                             className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            disabled={privacyStatus === 'private'}
                         />
+                        <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Choose file to upload</label>
                         <input
                             type="file"
                             onChange={(e) => setFile(e.target.files[0])}
@@ -273,11 +289,12 @@ const VideoUpload = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                             </svg>
                         </button>
+                        {message && <p className="drop-shadow-2xl my-3 text-red-500 text-center">{message}</p>}
                     </form>
                 </div>
-            </div>
+            </div >
         </div >
     );
 };
 
-export default VideoUpload;
+export default AddVideo;

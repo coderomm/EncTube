@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 function YouTuberDashboard() {
   const { user, loading } = useContext(AuthContext);
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState('');
-  const [processing, setProcessing] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const fetchPendingVideos = useCallback(async () => {
     setFetching(true);
@@ -21,6 +21,9 @@ function YouTuberDashboard() {
       setError('Error fetching pending videos');
     } finally {
       setFetching(false);
+      setTimeout(() => {
+        setMessage('')
+      }, 3000)
     }
   }, []);
 
@@ -36,32 +39,8 @@ function YouTuberDashboard() {
     }
   }, [user, loading, fetchPendingVideos]);
 
-  const handleApprove = async (id) => {
-    setProcessing(true);
-    try {
-      await axiosInstance.put(`/video/${id}`, { status: 'Approved' }, { withCredentials: true });
-      setVideos((prevVideos) => prevVideos.filter(video => video._id !== id));
-      setMessage('Video approved successfully');
-    } catch (error) {
-      console.error('Error approving video:', error);
-      setError('Error approving video');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleReject = async (id) => {
-    setProcessing(true);
-    try {
-      await axiosInstance.put(`/video/${id}`, { status: 'Rejected' }, { withCredentials: true });
-      setVideos((prevVideos) => prevVideos.filter(video => video._id !== id));
-      setMessage('Video rejected successfully');
-    } catch (error) {
-      console.error('Error rejecting video:', error);
-      setError('Error rejecting video');
-    } finally {
-      setProcessing(false);
-    }
+  const handleSelectVideo = (videoId) => {
+    navigate(`/youtuber/video/${videoId}`);
   };
 
   return (
@@ -88,20 +67,9 @@ function YouTuberDashboard() {
           videos.map(video => (
             <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">
               <h3 className="text-xl font-bold">{video.title}</h3>
-              <p className='mb-3'>{video.description}</p>
-              <button
-                className={`btn text-white py-1 px-3 rounded bg-green-500 hover:bg-green-600 mr-2 ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => handleApprove(video._id)}
-                disabled={processing}
-              >
-                Approve
-              </button>
-              <button
-                className={`btn text-white py-1 px-3 rounded bg-red-500 hover:bg-red-600 ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => handleReject(video._id)}
-                disabled={processing}
-              >
-                Reject
+              <button type="button" onClick={() => handleSelectVideo(video._id)} className="bg-gray-800 drop-shadow-2xl text-white w-auto py-1 px-4 mt-2 rounded flex items-center justify-center gap-2 hover:bg-gray-900">Select <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+              </svg>
               </button>
             </div>
           ))
