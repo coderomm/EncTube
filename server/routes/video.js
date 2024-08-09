@@ -222,7 +222,21 @@ router.get('/youtuber/pending/:id', authenticateYoutuber, async (req, res) => {
       if (!channel) {
         return res.status(404).json({ message: 'Channel not found' });
       }
+      const youtuber = await Youtuber.findById(userId);
+      if (!youtuber) {
+        return res.status(404).send('Youtuber not found');
+      }
+      oAuth2Client.setCredentials({
+        access_token: youtuber.accessToken,
+        refresh_token: youtuber.refreshToken
+      });
+
+      const [url] = await bucket.file(video.filePath.split('/').pop()).getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 15 * 60 * 1000,
+      });
       video = await Video.find({ channelId: channel._id, _id: req.params.id });
+      video.filePath = url;
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }

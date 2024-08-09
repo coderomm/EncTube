@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../utils/AxiosInstance';
 import { useParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import Loader from '../components/Loader';
 
 const AddVideo = () => {
     const { id: channelId } = useParams();
@@ -28,7 +29,7 @@ const AddVideo = () => {
 
     useEffect(() => {
         if (loading) {
-            return <div>Loading...</div>
+            return <Loader />
         }
         if (!loading && (!user || user.role !== 'Editor')) {
             return <Navigate to="/editor/login" />;
@@ -124,7 +125,7 @@ const AddVideo = () => {
     };
 
     if (going) {
-        return <div>Loading...</div>;
+        return <Loader />;
     }
 
     return (

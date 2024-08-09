@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import Loader from '../Loader';
 
 function YouTuberDashboard() {
   const { user, loading } = useContext(AuthContext);
@@ -29,7 +30,7 @@ function YouTuberDashboard() {
 
   useEffect(() => {
     if (loading) {
-      return;
+      return <Loader />;
     }
 
     if (!user || user.role !== 'YouTuber') {
@@ -62,7 +63,7 @@ function YouTuberDashboard() {
         <h2 className="text-2xl font-bold mb-4">Pending Videos: {videos.length}</h2>
         <hr className="border-black border-1 mb-4"></hr>
         {fetching ? (
-          <p>Loading...</p>
+          <p><Loader /></p>
         ) : (
           videos.map(video => (
             <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">

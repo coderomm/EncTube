@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
 import { Navigate, useNavigate } from 'react-router-dom';
+import Loader from '../Loader';
 
 function EditorDashboard() {
     const { user, loading } = useContext(AuthContext);
@@ -37,7 +38,7 @@ function EditorDashboard() {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <Loader />;
     }
 
     if (!loading && (!user || user.role !== 'Editor')) {

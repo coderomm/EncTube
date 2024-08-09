@@ -15,6 +15,7 @@ import AddVideo from './pages/AddVideo';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ApproveVideo from './pages/ApproveVideo';
+import Loader from './components/Loader';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/loader" element={<Loader />} />
           <Route path="/youtuber/login" element={<YouTuberLogin />} />
           <Route path="/editor/login" element={<EditorLogin />} />
           <Route path="/editor/signup" element={<EditorRegister />} />
