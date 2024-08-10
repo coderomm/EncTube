@@ -19,11 +19,7 @@ const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
 const OAUTH2_CLIENT_SECRET = process.env.CLIENT_SECRET;
 const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URL;
 
-const oAuth2Client = new OAuth2(
-  OAUTH2_CLIENT_ID,
-  OAUTH2_CLIENT_SECRET,
-  OAUTH2_REDIRECT_URL
-);
+const oAuth2Client = new OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URL);
 
 router.post('/editor/upload', authenticateEditor, upload.single('file'), async (req, res) => {
   const session = await mongoose.startSession();
@@ -133,7 +129,7 @@ router.post('/editor/upload', authenticateEditor, upload.single('file'), async (
 
         You can also Approve or Reject from your account, click the link below:
         
-        ${process.env.FRONTEND_URL}/youtuber-dashboard
+        ${process.env.FRONTEND_URL}/youtuber/video/${video._id}
         
         If you didn't found this relevent to you, please ignore this email and reply your response to this email.
         
@@ -213,33 +209,25 @@ router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
 
 router.get('/youtuber/pending/:id', authenticateYoutuber, async (req, res) => {
   const userId = req.user.userId;
-  const userRole = req.user.role;
   try {
-    let video;
-
-    if (userRole === 'YouTuber') {
-      const channel = await Channel.findOne({ youtuber: userId });
-      if (!channel) {
-        return res.status(404).json({ message: 'Channel not found' });
-      }
-      const youtuber = await Youtuber.findById(userId);
-      if (!youtuber) {
-        return res.status(404).send('Youtuber not found');
-      }
-      oAuth2Client.setCredentials({
-        access_token: youtuber.accessToken,
-        refresh_token: youtuber.refreshToken
-      });
-
-      const [url] = await bucket.file(video.filePath.split('/').pop()).getSignedUrl({
-        action: 'read',
-        expires: Date.now() + 15 * 60 * 1000,
-      });
-      video = await Video.find({ channelId: channel._id, _id: req.params.id });
-      video.filePath = url;
-    } else {
-      return res.status(403).json({ message: 'Access denied, invalid role' });
+    const youtuber = await Youtuber.findById(userId);
+    if (!youtuber) {
+      return res.status(404).send('Youtuber not found');
     }
+    let video = await Video.findById(req.params.id);
+    if (!video) {
+      return res.status(404).send('Video not found');
+    }
+    oAuth2Client.setCredentials({
+      access_token: youtuber.accessToken,
+      refresh_token: youtuber.refreshToken
+    });
+    const [signedUrl] = await bucket.file(video.filePath.split('/').pop()).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000,
+    });
+    video = video.toObject();
+    video.signedUrl = signedUrl;
     res.status(200).json(video);
   } catch (error) {
     console.error('Error fetching pending video:', error);
@@ -301,7 +289,6 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         session.endSession();
         return res.status(400).send('Invalid publishAt date format');
       }
-      console.log('publishAtUTC:', publishAtUTC)
 
       const uploadResponse = await youtube.videos.insert({
         part: 'snippet,status',

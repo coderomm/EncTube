@@ -35,6 +35,7 @@ function App() {
           <Route path="/editor/channel/:id" element={<ProtectedRouteEditor><AddVideo /></ProtectedRouteEditor>} />
           <Route path="/youtuber/dashboard" element={<ProtectedRouteYouTuber><YouTuberDashboard /></ProtectedRouteYouTuber>} />
           <Route path="/youtuber/video/:id" element={<ProtectedRouteYouTuber><ApproveVideo /></ProtectedRouteYouTuber>} />
+          <Route path="/youtuber/approve/:id" element={<ApproveVideoFromMail />} />
           <Route path="/youtuber/dashboard/invite-editor" element={<ProtectedRouteYouTuber>
             <InvitationForm />
           </ProtectedRouteYouTuber>}

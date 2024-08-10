@@ -32,9 +32,9 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
 
         let invitationLink;
         if (editor) {
-            invitationLink = `${process.env.FRONTEND_URL}/confirm-channel?email=${editorEmail}&token=${token}`;
+            invitationLink = `${process.env.FRONTEND_URL}/editor/confirm-channel?email=${editorEmail}&token=${token}`;
         } else {
-            invitationLink = `${process.env.FRONTEND_URL}/register-editor?email=${editorEmail}&token=${token}`;
+            invitationLink = `${process.env.FRONTEND_URL}/editor/signup?email=${editorEmail}&token=${token}`;
         }
         // const response = await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register/confirm using the following link: ${invitationLink}`);
 

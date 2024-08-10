@@ -26,7 +26,8 @@ const loginSchema = zod.object({
 router.post('/register', async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
-    const validationResult = registerSchema.safeParse(req.body).session(session);
+
+    const validationResult = registerSchema.safeParse(req.body);
     if (!validationResult.success) {
         await session.abortTransaction();
         session.endSession();
