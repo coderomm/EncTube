@@ -1,7 +1,8 @@
 // routes/video.js
 const express = require('express');
+const { Readable } = require('stream');
 const router = express.Router();
-const fs = require('fs');
+const { z } = require('zod');
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 const axios = require('axios');
@@ -21,34 +22,85 @@ const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URL;
 
 const oAuth2Client = new OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URL);
 
-router.post('/editor/upload', authenticateEditor, upload.single('file'), async (req, res) => {
+const uploadSchema = z.object({
+  title: z.string({ required_error: 'Title is required' }).min(1),
+  description: z.string({ required_error: 'Description is required' }).min(1),
+  channelId: z.string({ required_error: 'Channel ID is required' }),
+  tags: z.string({ required_error: 'Tags are required' }),
+  categoryId: z.string({ required_error: 'Category ID is required' }),
+  defaultLanguage: z.string({ required_error: 'Default Language is required' }),
+  privacyStatus: z.enum(['private', 'public', 'unlisted']),
+  license: z.enum(['youtube', 'creativeCommon']).optional(),
+  publishAt: z.string().optional(),
+  selfDeclaredMadeForKids: z.boolean().optional(),
+});
+
+router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' }, { name: 'thumbnail' }]), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  const {
-    title, description, channelId, tags, categoryId, defaultLanguage,
-    privacyStatus, notifySubscribers, embeddable, license, publicStatsViewable,
-    publishAt, selfDeclaredMadeForKids
-  } = req.body;
-
   try {
-    if (!title || !description || !channelId || !req.file) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).send('Required fields are missing');
+    const validationResult = uploadSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ message: 'Invalid input data', errors: validationResult.error.errors });
+    }
+
+    const {
+      title, description, channelId, tags, categoryId, defaultLanguage,
+      privacyStatus, notifySubscribers, embeddable, license, publicStatsViewable,
+      publishAt, selfDeclaredMadeForKids
+    } = req.body;
+
+    if (!req.files['file'] || !req.files['thumbnail']) {
+      throw new Error('Video and thumbnail files are required');
     }
 
     const channel = await Channel.findById(channelId).session(session);
-    if (!channel) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).send('Channel not found');
-    }
+    if (!channel) throw new Error('Channel not found');
+
+    const youtuber = await Youtuber.findById(channel.youtuber).session(session);
+    if (!youtuber) throw new Error('YouTuber not found');
+
+    const editor = await Editor.findById(req.user.userId).session(session);
+    if (!editor) throw new Error('Editor not found');
+
+    const videoFile = req.files['file'][0];
+    const thumbnailFile = req.files['thumbnail'][0];
+
+    const videoFileName = `${Date.now()}_${videoFile.originalname}`;
+    const thumbnailFileName = `${Date.now()}_${thumbnailFile.originalname}`;
+
+    const videoUpload = bucket.file(videoFileName);
+    const thumbnailUpload = bucket.file(thumbnailFileName);
+
+    const bufferToStream = (buffer) => {
+      const stream = new Readable();
+      stream.push(buffer);
+      stream.push(null);
+      return stream;
+    };
+
+    const uploadStream = (file, stream) => {
+      return new Promise((resolve, reject) => {
+        const upload = stream.createWriteStream({ metadata: { contentType: file.mimetype } });
+        bufferToStream(file.buffer).pipe(upload)
+          .on('finish', resolve)
+          .on('error', reject);
+      });
+    };
+
+    await Promise.all([
+      uploadStream(videoFile, videoUpload),
+      uploadStream(thumbnailFile, thumbnailUpload)
+    ]);
+
+    const videoUrl = `https://storage.googleapis.com/${bucket.name}/${videoFileName}`;
+    const thumbnailUrl = `https://storage.googleapis.com/${bucket.name}/${thumbnailFileName}`;
 
     const video = new Video({
       title,
       description,
-      tags: tags.split(',').map(tag => tag.trim()),
+      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       categoryId,
       defaultLanguage,
       privacyStatus,
@@ -58,6 +110,8 @@ router.post('/editor/upload', authenticateEditor, upload.single('file'), async (
       publicStatsViewable,
       publishAt,
       selfDeclaredMadeForKids,
+      videoFilePath: videoUrl,
+      thumbnailFilePath: thumbnailUrl,
       youtubeVideoId: '',
       youtuberId: channel.youtuber,
       editorId: req.user.userId,
@@ -65,45 +119,11 @@ router.post('/editor/upload', authenticateEditor, upload.single('file'), async (
       status: 'Pending',
     });
 
-    const youtuber = await Youtuber.findById(channel.youtuber).session(session);
-    if (!youtuber) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).send('YouTuber not found');
-    }
-
-    const editor = await Editor.findById(req.user.userId).session(session);
-    if (!editor) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).send('Editor not found');
-    }
-
-    const fileName = `${Date.now()}_${req.file.originalname}`;
-    const fileUpload = bucket.file(fileName);
-
-    const stream = fileUpload.createWriteStream({
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    stream.on('error', (err) => {
-      console.error('Error uploading to Firebase Storage:', err);
-      session.abortTransaction();
-      session.endSession();
-      return res.status(500).send('Error uploading to Firebase Storage');
-    });
-
-    stream.on('finish', async () => {
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
-      video.filePath = publicUrl;
-      await video.save({ session });
-
-      const emailPayload = {
-        to: youtuber.email,
-        subject: 'New video upload on YT Video Manager by your editor',
-        text: `Hello,
+    await video.save({ session });
+    const emailPayload = {
+      to: youtuber.email,
+      subject: 'New video upload on YT Video Manager by your editor',
+      text: `Hello,
 
         A new video titled - "${title}" has been uploaded by your editor - ${editor.username} with this email address (${editor.email}).
         and asking your action.
@@ -136,26 +156,25 @@ router.post('/editor/upload', authenticateEditor, upload.single('file'), async (
         Thanks,
 
         The YT Video Manager Team`
-      };
+    };
 
-      try {
-        await axios.post(`${process.env.SMTP_URL}`, emailPayload);
-      } catch (emailError) {
-        console.error('Error sending email notification:', emailError);
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(500).send('Error sending email notification');
-      }
-
-      await session.commitTransaction();
+    try {
+      await axios.post(`${process.env.SMTP_URL}`, emailPayload);
+    } catch (emailError) {
+      console.error('Error sending email notification:', emailError);
+      await session.abortTransaction();
       session.endSession();
+      return res.status(500).send('Error sending email notification');
+    }
 
-      res.status(201).send(`Video uploaded successfully. Video ID: ${video._id}`);
-    });
-    stream.end(req.file.buffer);
+    await session.commitTransaction();
+    session.endSession();
+    res.status(201).send(`Video uploaded successfully. Video ID: ${video._id}`);
   } catch (error) {
     console.error('Error uploading video:', error);
-    await session.abortTransaction();
+    if (session.transaction.state !== 'committed') {
+      await session.abortTransaction();
+    }
     session.endSession();
     res.status(500).send('Error uploading video');
   }
@@ -222,12 +241,17 @@ router.get('/youtuber/pending/:id', authenticateYoutuber, async (req, res) => {
       access_token: youtuber.accessToken,
       refresh_token: youtuber.refreshToken
     });
-    const [signedUrl] = await bucket.file(video.filePath.split('/').pop()).getSignedUrl({
+    const [videoSignedUrl] = await bucket.file(video.videoFilePath.split('/').pop()).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 30 * 60 * 1000,
+    });
+    const [thumbnailSignedUrl] = await bucket.file(video.thumbnailFilePath.split('/').pop()).getSignedUrl({
       action: 'read',
       expires: Date.now() + 15 * 60 * 1000,
     });
     video = video.toObject();
-    video.signedUrl = signedUrl;
+    video.videoSignedUrl = videoSignedUrl;
+    video.thumbnailSignedUrl = thumbnailSignedUrl;
     res.status(200).json(video);
   } catch (error) {
     console.error('Error fetching pending video:', error);
@@ -268,18 +292,30 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
 
       const youtube = google.youtube({ version: 'v3', auth: oAuth2Client });
 
-      const [signedUrl] = await bucket.file(video.filePath.split('/').pop()).getSignedUrl({
+      const [videoSignedUrl] = await bucket.file(video.videoFilePath.split('/').pop()).getSignedUrl({
         action: 'read',
-        expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+        expires: Date.now() + 15 * 60 * 1000,
       });
 
-      const response = await axios({
-        url: signedUrl,
+      const [thumbnailSignedUrl] = await bucket.file(video.thumbnailFilePath.split('/').pop()).getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 15 * 60 * 1000,
+      });
+
+      const videoResponse = await axios({
+        url: videoSignedUrl,
+        method: 'GET',
+        responseType: 'stream',
+      });
+
+      const thumbnailResponse = await axios({
+        url: thumbnailSignedUrl,
         method: 'GET',
         responseType: 'stream',
       });
 
       let publishAtUTC;
+      console.log('video.publishAt:', video.publishAt)
       if (typeof video.publishAt === 'string') {
         publishAtUTC = video.publishAt.replace('+00:00', 'Z');
       } else if (video.publishAt instanceof Date) {
@@ -289,6 +325,7 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         session.endSession();
         return res.status(400).send('Invalid publishAt date format');
       }
+      console.log('publishAtUTC:', publishAtUTC)
 
       const uploadResponse = await youtube.videos.insert({
         part: 'snippet,status',
@@ -299,6 +336,11 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
             tags: video.tags,
             categoryId: video.categoryId,
             defaultLanguage: video.defaultLanguage,
+            thumbnails: {
+              default: {
+                url: thumbnailSignedUrl
+              }
+            }
           },
           status: {
             privacyStatus: video.privacyStatus,
@@ -311,9 +353,15 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
           },
         },
         media: {
-          body: response.data,
+          body: videoResponse.data,
+          thumbnail: {
+            body: thumbnailResponse.data
+          }
         },
       });
+
+      console.log('uploadResponse.data:', uploadResponse.data);
+      console.log('uploadResponse.config.data', uploadResponse.config.data);
 
       video.youtubeVideoId = uploadResponse.data.id;
     }

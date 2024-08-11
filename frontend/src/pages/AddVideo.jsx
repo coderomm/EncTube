@@ -23,6 +23,7 @@ const AddVideo = () => {
     const [selfDeclaredMadeForKids, setSelfDeclaredMadeForKids] = useState(true);
     const [categories, setCategories] = useState([]);
     const [file, setFile] = useState(null);
+    const [thumbnail, setThumbnail] = useState(null);
     const [going, setGoing] = useState(true);
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -92,6 +93,7 @@ const AddVideo = () => {
             formData.append('embeddable', embeddable);
         }
         formData.append('file', file);
+        formData.append('thumbnail', thumbnail);
         formData.append('channelId', channelId);
         formData.append('editorId', user.userId);
         try {
@@ -276,6 +278,14 @@ const AddVideo = () => {
                             onChange={(e) => setPublishAt(e.target.value)}
                             className="w-full mb-4 px-4 py-2 border rounded-lg"
                             disabled={privacyStatus === 'private'}
+                        />
+                        <label className="label mt-4 mb-1 ms-1">Upload Thumbnail</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setThumbnail(e.target.files[0])}
+                            required
+                            className="w-full mb-4 px-4 py-2 border rounded-lg"
                         />
                         <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Choose file to upload</label>
                         <input

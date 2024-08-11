@@ -10,6 +10,7 @@ const ApproveVideo = () => {
     const [video, setVideo] = useState([]);
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
+    const [rejecting, setRejecting] = useState(false);
     const [fetching, setFetching] = useState(true);
 
     useEffect(() => {
@@ -58,7 +59,7 @@ const ApproveVideo = () => {
     };
 
     const handleReject = async (id) => {
-        setUploading(true);
+        setRejecting(true)
         try {
             await axiosInstance.put(`/video/youtuber/approve/${id}`, { status: 'Rejected' }, { withCredentials: true });
             setVideo('');
@@ -67,7 +68,7 @@ const ApproveVideo = () => {
             console.error('Error rejecting video:', error);
             setMessage('Error rejecting video');
         } finally {
-            setUploading(false);
+            setRejecting(false)
         }
     };
 
@@ -121,23 +122,27 @@ const ApproveVideo = () => {
                                     <div className='text-md text-gray-600'>{videoPublishDate}</div>
                                 </div>
                             )}
+                            <div className="flex flex-col">
+                                <label className='font-bold text-gray-700'>Thumbnail</label>
+                                <img src={video.thumbnailSignedUrl} className='w-32 h-auto rounded-lg drop-shadow-2xl' alt={`${video.title} thumbnail`} />
+                            </div>
                         </div>
                         <div className="rounded-lg drop-shadow-2xl flex-grow flex mx-auto">
                             <video controls className='w-60 h-auto m-auto rounded'>
-                                <source src={video.signedUrl} type="video/mp4" />
+                                <source src={video.videoSignedUrl} type="video/mp4" />
                                 Your browser does not support the video tag.
                             </video>
                         </div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                        <button type="submit" onClick={() => handleApprove(video._id)} className={`bg-gray-800 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
+                        <button type="submit" onClick={() => handleApprove(video._id)} className={`bg-gray-800 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading || rejecting ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading || rejecting}>
                             {uploading ? 'Uploading ...' : 'Upload'}
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                             </svg>
                         </button>
-                        <button type="submit" onClick={() => handleReject(video._id)} className={`bg-red-500 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-600 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
-                            {uploading ? 'Rejecting ...' : 'Reject'}
+                        <button type="submit" onClick={() => handleReject(video._id)} className={`bg-red-500 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-red-600 ${uploading || rejecting ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading || rejecting}>
+                            {rejecting ? 'Rejecting ...' : 'Reject'}
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
                             </svg>
