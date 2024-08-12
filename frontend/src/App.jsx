@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
 import Home from './pages/Home';
 import YouTuberLogin from './pages/YouTuberLogin';
 import EditorLogin from './pages/EditorLogin';
@@ -17,9 +16,9 @@ import ResetPassword from './pages/ResetPassword';
 import ApproveVideo from './pages/ApproveVideo';
 import Loader from './components/Loader';
 import ApproveVideoFromMail from './pages/ApproveVideoFromMail';
-import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { RecoilRoot } from 'recoil';
+import { Header } from './components/Header';
 
 function App() {
   return (
@@ -29,11 +28,13 @@ function App() {
           {/* <Header /> */}
           <div className="flex w-full">
             <div className="w-full">
-            <Sidebar />
-              <Navbar />
+              <Sidebar />
+              <Header />
               <main>
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/auth/signup" element={<Home />} />
+                  <Route path="/auth/login" element={<Home />} />
                   <Route path="/loader" element={<Loader />} />
                   <Route path="/youtuber/login" element={<YouTuberLogin />} />
                   <Route path="/editor/login" element={<EditorLogin />} />
