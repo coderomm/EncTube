@@ -1,16 +1,16 @@
-import { Link } from 'react-router-dom';
+import { HeroBanner } from '../components/HeroBanner';
+import { VideoRender } from '../components/dashboard/VideoRender';
 
 function Home() {
   return (
-    <div className="hero-section">
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h2 className="text-2xl mb-4">Welcome to YouTube Uploader</h2>
-        <div className="flex">
-          <Link to="/youtuber/login" className="btn">YouTuber Login</Link>
-          <Link to="/editor/login" className="btn ml-4">Editor Login</Link>
-        </div>
+    <section className='flex flex-col gap-3 min-h-screen h-[200vh]'>
+      <div className="bg-img rounded-[50px] mx-1 mt-2 md:mx-10 md:mt-8 p-8 md:p-16">
+        <HeroBanner />
       </div>
-    </div>
+      <div className="bg-img rounded-[50px] mt-2 md:mx-10 md:mt-8 md:p-16">
+        <VideoRender />
+      </div>
+    </section>
   );
 }
 
