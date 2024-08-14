@@ -1,4 +1,4 @@
-import bannerVideo from '../../../public/videos/video.mp4'
+import bannerVideo from '/videos/video.mp4'
 export const VideoRender = () => {
     return (
         <div className="flex flex-col-reverse md:flex-row gap-6">

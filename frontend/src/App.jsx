@@ -19,6 +19,7 @@ import ApproveVideoFromMail from './pages/ApproveVideoFromMail';
 import { Sidebar } from './components/Sidebar';
 import { RecoilRoot } from 'recoil';
 import { Header } from './components/Header';
+import { Login } from './pages/Login';
 
 function App() {
   return (
@@ -34,7 +35,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/auth/signup" element={<Home />} />
-                  <Route path="/auth/login" element={<Home />} />
+                  <Route path="/auth/login" element={<Login />} />
                   <Route path="/loader" element={<Loader />} />
                   <Route path="/youtuber/login" element={<YouTuberLogin />} />
                   <Route path="/editor/login" element={<EditorLogin />} />
