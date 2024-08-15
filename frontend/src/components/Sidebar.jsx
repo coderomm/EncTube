@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useRecoilState } from "recoil";
 import { SideBarOpen } from "../atoms/sidebarAtom";
-import { Menu } from './Menu';
+import Menu from './Menu';
 import { Link } from 'react-router-dom';
 
-export const Sidebar = () => {
+const Sidebar = () => {
 
     const modalRef = useRef(null);
     const [isOpen, setIsOpen] = useRecoilState(SideBarOpen);
@@ -67,3 +67,5 @@ export const Sidebar = () => {
         </aside>
     </>
 }
+
+export default Sidebar;

@@ -1,20 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-}
 
 * {
   box-sizing: border-box;
 }
 
+* ::before,
+* ::after {
+  box-sizing: border-box;
+}
+
+::selection {
+  color: white;
+  background: red;
+}
+
 body {
-  font-family: 'Lowball Regular', sans-serif;
+  font-family: "Dosis", sans-serif;
   background-color: #101010;
-  color: #ffffff;
+}
+
+.font-dosis {
+  font-family: "Dosis", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 @font-face {
@@ -60,6 +71,12 @@ header {
   transition: all .4s ease-in-out;
 }
 
+.brandBtn:hover {
+  background-position: 90% 0;
+  transition: all .4s ease-in-out;
+  box-shadow: 0 0 20px rgba(255, 53, 144, .5) !important;
+}
+
 .brandBtnOutline {
   box-shadow: inset 0 0 0 1px #818181;
 }
@@ -68,9 +85,28 @@ header {
   background: linear-gradient(136deg, #1b1b1b 2.27%, #101010);
   box-shadow: 0 7px 15px hsla(0, 0%, 100%, .07);
 }
-.iconhover{
+
+.iconhover {
   transition: .4s;
 }
+
 .iconhover:hover {
   background-image: linear-gradient(90deg, #5a0dff -5%, #ff29b8 31%, #ff581c);
+}
+
+.login-bg-shadow {
+  background: linear-gradient(95.04deg, #181818 7.27%, #151515 99.21%);
+  box-shadow: inset 0 0 0 2px #1d1d1d;
+}
+
+.bg-faq-collaps {
+  background: linear-gradient(95deg, #181818 7.27%, #151515 99.21%);
+}
+
+.bg-black-ice {
+  background: linear-gradient(95deg, #181818 7.27%, #151515 99.21%);
+}
+
+.bg-faq-collaps button {
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, border-radius 0.15s ease;
 }

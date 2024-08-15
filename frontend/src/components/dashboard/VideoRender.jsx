@@ -1,5 +1,5 @@
 import bannerVideo from '/videos/video.mp4'
-export const VideoRender = () => {
+const VideoRender = () => {
     return (
         <div className="flex flex-col-reverse md:flex-row gap-6">
             <div className="tracking-wider text-white text-center flex-grow w-full p-5">
@@ -25,3 +25,4 @@ export const VideoRender = () => {
         </div>
     )
 }
+export default VideoRender;

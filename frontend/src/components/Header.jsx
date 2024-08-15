@@ -1,8 +1,8 @@
 import { useSetRecoilState } from "recoil";
 import { SideBarOpen } from "../atoms/sidebarAtom";
-import { Menu } from "./Menu";
+import Menu from "./Menu";
 
-export const Header = () => {
+const Header = () => {
     const setSideBarOpen = useSetRecoilState(SideBarOpen);
 
     return (
@@ -24,3 +24,5 @@ export const Header = () => {
         </header >
     );
 };
+
+export default Header;

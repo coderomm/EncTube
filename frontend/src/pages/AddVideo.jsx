@@ -133,7 +133,7 @@ const AddVideo = () => {
     return (
         <div className="my-8 container mx-auto px-4 md:px-0">
             {channel && (
-                <div className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4 sm:flex items-center justify-start ">
+                <div className="bg-img text-white p-4 rounded-[10px] drop-shadow-2xl mb-4 sm:flex items-center justify-start">
                     <h2 className="text-2xl font-bold mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     </svg>Channel - <nbsp></nbsp>
@@ -142,21 +142,21 @@ const AddVideo = () => {
                 </div>
             )}
             <div className="mb-4 grid grid-cols-1 gap-4">
-                <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
+                <div className="bg-img text-white p-4 rounded-lg drop-shadow-2xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
                     </svg> Pending Videos - {videos.length}</h2>
                     <hr className="border-black border-1 mb-4"></hr>
                     {videos.length === 0 ? ('') : (
                         videos.map((video) => (
-                            <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">
+                            <div key={video._id} className="bg-img text-white p-4 rounded-lg drop-shadow-2xl mb-4">
                                 <h3 className="text-xl font-bold">{video.title}</h3>
                                 <p className='mb-3'>{video.description}</p>
                             </div>
                         ))
                     )}
                 </div>
-                <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
+                <div className="bg-img text-white p-4 rounded-lg drop-shadow-2xl">
                     <form onSubmit={handleUpload}>
                         <h2 className="text-2xl font-bold mb-4">Enter video data...</h2>
                         <input
@@ -165,39 +165,39 @@ const AddVideo = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         />
                         <textarea
                             placeholder="Description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         ></textarea>
                         <input
                             type="text"
                             placeholder="Tags (comma separated)"
                             value={tags}
                             onChange={(e) => setTags(e.target.value)}
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         />
                         <input
                             type="text"
                             placeholder="Default Language (e.g., 'en')"
                             value={defaultLanguage}
                             onChange={(e) => setDefaultLanguage(e.target.value)}
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-3">
                             <select
                                 value={categoryId}
                                 onChange={(e) => setCategoryId(e.target.value)}
                                 required
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
+                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                             >
-                                <option value="">Select Category</option>
+                                <option className='text-white bg-[#1d1d1d] hover:bg-[#1d1d1d]' value="">Select Category</option>
                                 {categories.map(category => (
-                                    <option key={category.id} value={category.id}>
+                                    <option className='text-white bg-[#1d1d1d]' key={category.id} value={category.id}>
                                         {category.title}
                                     </option>
                                 ))}
@@ -214,7 +214,7 @@ const AddVideo = () => {
                                     }
                                 }}
                                 required
-                                className="w-full mb-4 px-4 py-2 border rounded-lg"
+                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                             >
                                 <option value="private">Private</option>
                                 <option value="public">Public</option>
@@ -225,7 +225,7 @@ const AddVideo = () => {
                             value={license}
                             onChange={(e) => setLicense(e.target.value)}
                             required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         >
                             <option value="youtube">YouTube License</option>
                             <option value="creativeCommon">Creative Commons</option>
@@ -276,7 +276,7 @@ const AddVideo = () => {
                             type="datetime-local"
                             value={publishAt}
                             onChange={(e) => setPublishAt(e.target.value)}
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                             disabled={privacyStatus === 'private'}
                         />
                         <label className="label mt-4 mb-1 ms-1">Upload Thumbnail</label>
@@ -285,16 +285,16 @@ const AddVideo = () => {
                             accept="image/*"
                             onChange={(e) => setThumbnail(e.target.files[0])}
                             required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         />
                         <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Choose file to upload</label>
                         <input
                             type="file"
                             onChange={(e) => setFile(e.target.files[0])}
                             required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg"
+                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                         />
-                        <button type="submit" className={`bg-gray-800 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
+                        <button type="submit" className={`brandBtn font-lowballBold text-xl tracking-wider drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
                             {uploading ? 'Uploading ...' : 'Upload'}
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />

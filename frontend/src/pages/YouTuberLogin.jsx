@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import Loader from '../components/Loader';
 
 function YouTuberLogin() {
   useEffect(() => {
@@ -7,8 +8,8 @@ function YouTuberLogin() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <button className="btn">Redirecting to Google Login...</button>
+    <div className="flex flex-col items-center justify-center bg-img">
+      <Loader />
     </div>
   );
 }
