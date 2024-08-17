@@ -22,6 +22,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Features from './pages/Features';
 import Footer from './components/Footer';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function MainContent() {
             {!user && <Route path="/" element={<Home />} />}
             <Route path="/loader" element={<Loader />} />
             <Route path="/us/features" element={<Features />} />
+            <Route path="/us/contact-us" element={<Contact />} />
             <Route path="/youtuber/login" element={<YouTuberLogin />} />
             <Route path="/editor/login" element={<EditorLogin />} />
             <Route path="/editor/signup" element={<EditorRegister />} />

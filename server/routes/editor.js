@@ -105,22 +105,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post("/logout", authenticateEditor, (req, res) => {
-    try {
-        res.cookie('token', '', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict'
-        });
-        res.status(200).json({ message: "Logged out successfully" });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Internal server error",
-            error: error.message
-        });
-    }
-});
-
 router.get('/channels', authenticateEditor, async (req, res) => {
     try {
         const channels = await Channel.find({ editors: req.user.userId }).populate('youtuber', 'channelName channelUrl');

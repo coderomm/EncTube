@@ -6,6 +6,7 @@ const OAuth2 = google.auth.OAuth2;
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
 const Channel = require('../models/Channel');
+const Editor = require('../models/Editor');
 
 const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
 const OAUTH2_CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -96,17 +97,74 @@ router.get('/oauth2callback', async (req, res) => {
   }
 });
 
-router.get('/checkAuth', (req, res) => {
-  const token = req.cookies.youtuberToken || req.cookies.editorToken;
-  if (!token) {
-    return res.status(401).json({ message: 'Not authenticated' });
-  }
-
+router.get('/checkAuth', async (req, res) => {
+  const youtuberToken = req.cookies.youtuberToken;
+  const editorToken = req.cookies.editorToken;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json({ user: decoded });
+    if (youtuberToken) {
+      const decodedYoutuber = jwt.verify(youtuberToken, process.env.JWT_SECRET);
+      const youtuber = await Youtuber.findById(decodedYoutuber.userId);
+      if (!youtuber) {
+        return res.status(401).json({ message: 'User no longer exists' });
+      }
+      return res.status(200).json({ user: decodedYoutuber, role: 'Youtuber' });
+    }
+
+    if (editorToken) {
+      const decodedEditor = jwt.verify(editorToken, process.env.JWT_SECRET);
+      const editor = await Editor.findById(decodedEditor.userId);
+      if (!editor) {
+        return res.status(401).json({ message: 'User no longer exists' });
+      }
+      return res.status(200).json({ user: decodedEditor, role: 'Editor' });
+    }
+    return res.status(401).json({ message: 'Not authenticated' });
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  const youtuberToken = req.cookies.youtuberToken;
+  const editorToken = req.cookies.editorToken;
+  try {
+    if (youtuberToken) {
+      const decodedYoutuber = jwt.verify(youtuberToken, process.env.JWT_SECRET);
+      const youtuber = await Youtuber.findById(decodedYoutuber.userId);
+      if (!youtuber) {
+        return res.status(401).json({ message: 'User no longer exists' });
+      }
+      res.cookie('youtuberToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        expires: new Date(0)
+      });
+    }
+
+    if (editorToken) {
+      const decodedEditor = jwt.verify(editorToken, process.env.JWT_SECRET);
+      const editor = await Editor.findById(decodedEditor.userId);
+      if (!editor) {
+        return res.status(401).json({ message: 'User no longer exists' });
+      }
+      res.cookie('editorToken', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        expires: new Date(0)
+      });
+    }
+    if (!youtuberToken && !editorToken) {
+      return res.status(400).json({ message: "No active session found" });
+    }
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message
+    });
   }
 });
 

@@ -57,11 +57,11 @@ const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/editor/logout');
+      await axiosInstance.post('/auth/logout');
       setUser(null);
       navigate('/home');
     } catch (error) {
-      console.error('Logout failed', error);
+      console.error('Error fetching pending videos:', error);
     }
   };
 

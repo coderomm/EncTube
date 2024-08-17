@@ -46,23 +46,23 @@ function EditorDashboard() {
     }
 
     return (
-        <div className="my-8 container mx-auto px-4 md:px-0">
-            <div className="bg-white p-4 rounded-lg drop-shadow-2xl text-black">
+        <section className="my-8 container mx-auto px-4 md:px-0">
+            <div className="bg-img p-4 rounded-lg drop-shadow-2xl text-white">
                 <h1 className="text-3xl font-bold mb-4">Editor Dashboard</h1>
                 <input
                     type="text"
                     placeholder="Search Channels..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 mb-4 border rounded drop-shadow-xl"
+                    className="w-full p-2 mb-4 border rounded drop-shadow-xl bg-transparent"
                 />
                 {error && <p className="text-red-600">{error}</p>}
                 <hr className="border-black border-1 mb-4"></hr>
 
                 {filteredChannels.map(channel => (
-                    <div key={channel._id} className="flex justify-between">
+                    <div key={channel._id} className="flex justify-between bg-[#1d1d1d] p-3 rounded-xl">
                         <div className="flex">
-                            <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
+                            <div className="rounded-full h-12 w-12 bg-[#999] flex justify-center mt-1 mr-2">
                                 <div className="flex flex-col justify-center h-full text-xl">{channel.youtuber.channelName[0].toUpperCase()}</div>
                             </div>
                             <div className="flex flex-col justify-center h-ful">
@@ -78,7 +78,7 @@ function EditorDashboard() {
                     </div>
                 ))}
             </div>
-        </div>
+        </section>
     );
 }
 

@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
+const Editor = require('../models/Editor');
+const Youtuber = require('../models/Youtuber');
 
-const authenticateEditor = (req, res, next) => {
+const authenticateEditor = async (req, res, next) => {
     const token = req.cookies.editorToken;
 
     if (!token) {
@@ -9,17 +11,25 @@ const authenticateEditor = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
         if (decoded.role !== 'Editor') {
             return res.status(403).send('Access denied, Editor role required');
         }
+
+        const editor = await Editor.findById(decoded.userId);
+        if (!editor) {
+            return res.status(403).send('Access denied, user no longer exists');
+        }
+
         req.user = decoded;
-        console.log('Editor user:', decoded)
+        console.log('Editor user:', decoded);
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');
     }
 };
-const authenticateYoutuber = (req, res, next) => {
+
+const authenticateYoutuber = async (req, res, next) => {
     const token = req.cookies.youtuberToken;
 
     if (!token) {
@@ -28,32 +38,25 @@ const authenticateYoutuber = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
         if (decoded.role !== 'YouTuber') {
             return res.status(403).send('Access denied, YouTuber role required');
         }
+
+        const youtuber = await Youtuber.findById(decoded.userId);
+        if (!youtuber) {
+            return res.status(403).send('Access denied, user no longer exists');
+        }
+
         req.user = decoded;
-        console.log('YouTuber user:', decoded)
+        console.log('YouTuber user:', decoded);
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');
     }
 };
 
-const authenticateBoth = (req, res, next) => {
-    const editorToken = req.cookies.editorToken;
-    const youtuberToken = req.cookies.youtuberToken;
-
-    if (editorToken) {
-        return authenticateEditor(req, res, next);
-    } else if (youtuberToken) {
-        return authenticateYoutuber(req, res, next);
-    } else {
-        return res.status(403).send('Access denied, Authorization token missing');
-    }
-};
-
 module.exports = {
     authenticateEditor,
     authenticateYoutuber,
-    authenticateBoth
 };

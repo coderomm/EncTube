@@ -30,7 +30,7 @@ function EditorLogin() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center my-8 container mx-auto px-4 md:px-0 bg-[#101010]">
       <div className="login-bg-shadow p-8 rounded-[30px] drop-shadow-2xl w-full md:w-2/3 lg:w-[35%]">
-        <h2 className="text-3xl mb-8 text-center tracking-wider font-lowballRegular">Login in to your account</h2>
+        <h2 className="text-3xl mb-8 text-center tracking-wider font-lowballRegular text-white">Login in to your account</h2>
         <form onSubmit={handleLogin}>
           <input
             type="email"
