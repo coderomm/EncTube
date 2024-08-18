@@ -11,7 +11,8 @@ const AddVideo = () => {
     const [videos, setVideos] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [tags, setTags] = useState('');
+    const [tags, setTags] = useState([]);
+    const [currentTag, setCurrentTag] = useState('');
     const [categoryId, setCategoryId] = useState('');
     const [defaultLanguage, setDefaultLanguage] = useState('en');
     const [privacyStatus, setPrivacyStatus] = useState('private');
@@ -81,7 +82,7 @@ const AddVideo = () => {
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
-        formData.append('tags', tags.split(',').map(tag => tag.trim()));
+        formData.append('tags', JSON.stringify(tags));
         formData.append('categoryId', categoryId);
         formData.append('defaultLanguage', defaultLanguage);
         formData.append('privacyStatus', privacyStatus);
@@ -103,7 +104,7 @@ const AddVideo = () => {
             setVideos([...videos, response.data]);
             setTitle('');
             setDescription('');
-            setTags('');
+            setTags([]);
             setCategoryId('');
             setDefaultLanguage('');
             setPrivacyStatus('private');
@@ -126,13 +127,28 @@ const AddVideo = () => {
         }
     };
 
+    const handleTagInput = (e) => {
+        const value = e.target.value;
+        if (value.includes(',')) {
+            const newTags = value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+            setTags([...tags, ...newTags]);
+            setCurrentTag('');
+        } else {
+            setCurrentTag(value);
+        }
+    };
+
+    const removeTag = (index) => {
+        setTags(tags.filter((_, i) => i !== index));
+    };
+
     if (going) {
         return <Loader />;
     }
 
     return (
         <section className="bg-img">
-            <div className="container mx-auto ">
+            <div className="container mx-auto p-4 px-2">
                 {channel && (
                     <div className=" text-white py-4 drop-shadow-2xl mb-4 sm:flex items-center justify-start">
                         <h2 className="text-2xl font-bold mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -150,10 +166,17 @@ const AddVideo = () => {
                         </svg> Awaiting Approval - {videos.length}</h2>
                         <p href="" className=" mb-4 text-lg tracking-wider text-[#999999]">These videos are currently under review and will be published once approved.</p>
                         {videos.length === 0 ? ('') : (
-                            videos.map((video) => (
-                                <div key={video._id} className="bg-[#1d1d1d] text-white p-4 rounded-lg drop-shadow-2xl mb-4">
-                                    <h3 className="text-xl font-bold">{video.title}</h3>
-                                    <p className='mb-3'>{video.description}</p>
+                            videos.map(video => (
+                                <div key={video._id} className="bg-[#141414d1] text-white p-4 rounded-lg drop-shadow-2xl mb-4">
+                                    <h3 className="text-xl tex-xl">Title: <span className='font-lowballRegular tracking-wider'> {video.title}</span></h3>
+                                    <p className="text-lg tex-xl">Added on: <span className='font-lowballRegular tracking-wider'>{new Date(video.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit'
+                                    })}</span></p>
                                 </div>
                             ))
                         )}
@@ -196,68 +219,87 @@ const AddVideo = () => {
                                 className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
                             />
                             <p className="mt-4 mb-1 ms-1 text-2xl font-lowballRegular tracking-wider">Tags & Metadata -</p>
-                            <label className="label mt-4 mb-1 ms-1">Enter tags seprated by comma (,)</label>
-                            <input
-                                type="text"
-                                placeholder="Tags (comma separated)"
-                                value={tags}
-                                onChange={(e) => setTags(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                            />
-                            <label className="label mt-4 mb-1 ms-1">Video language (selected &apos;en&apos; default)</label>
-                            <input
-                                type="text"
-                                placeholder="Default Language (e.g., 'en')"
-                                value={defaultLanguage}
-                                disabled
-                                onChange={(e) => setDefaultLanguage(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                            />
-                            <label className="label mt-4 mb-1 ms-1">Choose category</label>
                             <div className="grid grid-cols-1 md:grid-cols-2 md:gap-3">
-                                <select
-                                    value={categoryId}
-                                    onChange={(e) => setCategoryId(e.target.value)}
-                                    required
-                                    className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                                >
-                                    <option className='text-white bg-[#1d1d1d]' value="">Select a category</option>
-                                    {categories.map(category => (
-                                        <option className='text-white bg-[#1d1d1d]' key={category.id} value={category.id}>
-                                            {category.title}
-                                        </option>
-                                    ))}
-                                </select>
-                                <label className="label mt-4 mb-1 ms-1">Choose visibility</label>
-                                <select
-                                    value={privacyStatus}
-                                    onChange={(e) => {
-                                        setPrivacyStatus(e.target.value)
-                                        if (e.target.value === 'private') {
-                                            setPublicStatsViewable(false);
-                                            setPublishAt('');
-                                            setNotifySubscribers(false)
-                                            setEmbeddable(false)
-                                        }
-                                    }}
-                                    required
-                                    className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                                >
-                                    <option className='text-white bg-[#1d1d1d]' value="private">Private</option>
-                                    <option className='text-white bg-[#1d1d1d]' value="public">Public</option>
-                                    <option className='text-white bg-[#1d1d1d]' value="unlisted">Unlisted</option>
-                                </select>
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1">Enter tags seprated by comma (,)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Tags (comma separated)"
+                                        value={currentTag}
+                                        onChange={handleTagInput}
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                                    />
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {tags.map((tag, index) => (
+                                            <span key={index} className="bg-gray-800 text-white px-2 py-1 rounded-full cursor-pointer" onClick={() => removeTag(index)}>
+                                                {tag} &times;
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1">Video language (selected &apos;en&apos; default)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Default Language (e.g., 'en')"
+                                        value={defaultLanguage}
+                                        disabled
+                                        onChange={(e) => setDefaultLanguage(e.target.value)}
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                                    />
+                                </div>
                             </div>
-                            <label className="label mt-4 mb-1 ms-1">Choose license</label>
-                            <select
-                                value={license}
-                                onChange={(e) => setLicense(e.target.value)}
-                                required
-                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                            >
-                                <option className='text-white bg-[#1d1d1d]' value="youtube">YouTube License</option>
-                                <option className='text-white bg-[#1d1d1d]' value="creativeCommon">Creative Commons</option>
-                            </select>
+                            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-3">
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1">Choose category</label>
+                                    <select
+                                        value={categoryId}
+                                        onChange={(e) => setCategoryId(e.target.value)}
+                                        required
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                                    >
+                                        <option className='text-white bg-[#1d1d1d]' value="">Select a category</option>
+                                        {categories.map(category => (
+                                            <option className='text-white bg-[#1d1d1d]' key={category.id} value={category.id}>
+                                                {category.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1">Choose visibility</label>
+                                    <select
+                                        value={privacyStatus}
+                                        onChange={(e) => {
+                                            setPrivacyStatus(e.target.value)
+                                            if (e.target.value === 'private') {
+                                                setPublicStatsViewable(false);
+                                                setPublishAt('');
+                                                setNotifySubscribers(false)
+                                                setEmbeddable(false)
+                                            }
+                                        }}
+                                        required
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                                    >
+                                        <option className='text-white bg-[#1d1d1d]' value="private">Private</option>
+                                        <option className='text-white bg-[#1d1d1d]' value="public">Public</option>
+                                        <option className='text-white bg-[#1d1d1d]' value="unlisted">Unlisted</option>
+                                    </select>
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1">Choose license</label>
+                                    <select
+                                        value={license}
+                                        onChange={(e) => setLicense(e.target.value)}
+                                        required
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                                    >
+                                        <option className='text-white bg-[#1d1d1d]' value="youtube">YouTube License</option>
+                                        <option className='text-white bg-[#1d1d1d]' value="creativeCommon">Creative Commons</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-4 md:gap-3">
                                 <label className="flex items-center mb-4">
                                     <input
@@ -299,21 +341,25 @@ const AddVideo = () => {
                                     Made for Kids
                                 </label>
                             </div>
-                            <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Select date & time to schedule</label>
-                            <input
-                                type="datetime-local"
-                                value={publishAt}
-                                onChange={(e) => setPublishAt(e.target.value)}
-                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                                disabled={privacyStatus === 'private'}
-                            />
-                            <button type="submit" className={`brandBtn font-lowballBold text-xl tracking-wider drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
+                            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-3">
+                                <div className="flex flex-col items-start">
+                                    <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Select date & time to schedule</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={publishAt}
+                                        onChange={(e) => setPublishAt(e.target.value)}
+                                        className="w-full mb-4 px-4 py-2 border rounded-lg bg-white text-black"
+                                        disabled={privacyStatus === 'private'}
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className={`brandBtn font-lowballBold text-xl tracking-wider mt-6 drop-shadow-2xl text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={uploading}>
                                 {uploading ? 'Uploading ...' : 'Upload'}
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                                 </svg>
                             </button>
-                            {message && <p className="drop-shadow-2xl my-3 text-red-500 text-center">{message}</p>}
+                            {message && <p className="bg-white text-[#ff0000] p-2 py-0 rounded-lg shadow-md my-4 text-lg text-center">{message}</p>}
                         </form>
                     </div>
                 </div >

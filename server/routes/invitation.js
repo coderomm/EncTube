@@ -41,7 +41,12 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
         const emailPayload = {
             to: editorEmail,
             subject: 'Invitation to Join as an Editor',
-            text: `Please register/confirm using the following link: ${invitationLink}`
+            text: `
+            Hello,
+
+            You have been invited to join as a editor, please register/confirm by clicking on the link below:
+            
+            ${invitationLink}`
         };
         await axios.post('https://send-anonymous-mail.onrender.com/api/v1/send-email', emailPayload);
         await session.commitTransaction();

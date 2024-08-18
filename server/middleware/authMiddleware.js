@@ -31,7 +31,6 @@ const authenticateEditor = async (req, res, next) => {
 
 const authenticateYoutuber = async (req, res, next) => {
     const token = req.cookies.youtuberToken;
-
     if (!token) {
         return res.status(403).send('Access denied, Authorization token missing');
     }

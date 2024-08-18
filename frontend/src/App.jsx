@@ -23,6 +23,7 @@ import Header from './components/Header';
 import Features from './pages/Features';
 import Footer from './components/Footer';
 import Contact from './pages/Contact';
+import EditorsList from './pages/EditorsList';
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function MainContent() {
             {user && user.role === 'YouTuber' &&
               <Route path="/" element={<Navigate to="/youtuber/dashboard" replace />} />}
             <Route path="/youtuber/dashboard" element={<ProtectedRouteYouTuber><YouTuberDashboard /></ProtectedRouteYouTuber>} />
+            <Route path="/youtuber/all-editors" element={<ProtectedRouteYouTuber><EditorsList /></ProtectedRouteYouTuber>} />
             <Route path="/youtuber/video/:id" element={<ProtectedRouteYouTuber><ApproveVideo /></ProtectedRouteYouTuber>} />
             <Route path="/youtuber/approve/:id" element={<ProtectedRouteYouTuber><ApproveVideoFromMail /></ProtectedRouteYouTuber>} />
             <Route path="/youtuber/dashboard/invite-editor" element={<ProtectedRouteYouTuber>

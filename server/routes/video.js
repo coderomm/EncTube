@@ -26,7 +26,7 @@ const uploadSchema = z.object({
   title: z.string({ required_error: 'Title is required' }).min(1),
   description: z.string({ required_error: 'Description is required' }).min(1),
   channelId: z.string({ required_error: 'Channel ID is required' }),
-  tags: z.string({ required_error: 'Tags are required' }),
+  tags: z.array(z.string({ required_error: 'Each tag must be a string' })).nonempty({ message: 'At least one tag is required' }),
   categoryId: z.string({ required_error: 'Category ID is required' }),
   defaultLanguage: z.string({ required_error: 'Default Language is required' }),
   privacyStatus: z.enum(['private', 'public', 'unlisted']),
@@ -38,7 +38,11 @@ const uploadSchema = z.object({
 router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' }, { name: 'thumbnail' }]), async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
+  try {
+    req.body.tags = JSON.parse(req.body.tags);
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid tags format' });
+  }
   try {
     const validationResult = uploadSchema.safeParse(req.body);
     if (!validationResult.success) {
@@ -100,7 +104,7 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     const video = new Video({
       title,
       description,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      tags,
       categoryId,
       defaultLanguage,
       privacyStatus,
@@ -122,13 +126,12 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     await video.save({ session });
     const emailPayload = {
       to: youtuber.email,
-      subject: 'New video upload on YT Video Manager by your editor',
-      text: `Hello,
+      subject: 'New video upload on EncTube by your editor',
+      text: `Hello ${youtuber.channelName},
 
-        A new video titled - "${title}" has been uploaded by your editor - ${editor.username} with this email address (${editor.email}).
-        and asking your action.
+        A new video titled - "${title}" has been uploaded by your editor ${editor.username} (${editor.email})
 
-        Uploaded video details - 
+        Video Details:
         Title - ${title},
         Description - ${description},
         Channel - ${youtuber.channelName} (${youtuber.channelUrl}),
@@ -140,22 +143,18 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
         Embeddable - ${embeddable},
         License - ${license},
         Public Stats Viewable - ${publicStatsViewable},
-        Publish At - ${publishAt},
+        Publish At - ${new Date(publishAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })},
         Self Declared Made For Kids - ${selfDeclaredMadeForKids},
 
         To Approve the uploaded video, please click on the following link:
 
-        ${process.env.BACKEND_BASE_URL}/video/id=${video._id}?status=Approved
-
-        You can also Approve or Reject from your account, click the link below:
-        
-        ${process.env.FRONTEND_URL}/youtuber/video/${video._id}
+        ${process.env.FRONTEND_URL}/youtuber/approve/${video._id}
         
         If you didn't found this relevent to you, please ignore this email and reply your response to this email.
         
-        Thanks,
+        Thank you,
 
-        The YT Video Manager Team`
+        The EncTube Team`
     };
 
     try {
@@ -214,7 +213,8 @@ router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
       if (!channel) {
         return res.status(404).json({ message: 'Channel not found' });
       }
-      pendingVideos = await Video.find({ channelId: channel._id, status: 'Pending' });
+      pendingVideos = await Video.find({ channelId: channel._id, status: 'Pending' })
+        .populate('editorId', 'username email');
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }
@@ -347,7 +347,7 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
             embeddable: video.embeddable,
             license: video.license,
             publicStatsViewable: video.publicStatsViewable,
-            publishAt: publishAtUTC,
+            // publishAt: publishAtUTC,
             selfDeclaredMadeForKids: video.selfDeclaredMadeForKids,
             notifySubscribers: video.notifySubscribers
           },
@@ -359,21 +359,17 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
           }
         },
       });
-
-      console.log('uploadResponse.data:', uploadResponse.data);
-      console.log('uploadResponse.config.data', uploadResponse.config.data);
-
       video.youtubeVideoId = uploadResponse.data.id;
     }
     await video.save({ session });
     await session.commitTransaction();
     session.endSession();
-    res.status(200).send('Video status updated');
+    res.status(200).send('Video uploaded successfully');
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Error updating video status:', error);
-    res.status(500).send('Error updating video status');
+    console.error('Error uploading video status:', error);
+    res.status(500).send('Error uploading video status');
   }
 });
 

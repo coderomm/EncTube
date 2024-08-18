@@ -53,30 +53,58 @@ function YouTuberDashboard() {
     <div className="my-8 container mx-auto px-4 md:px-0">
       {error && <p className="bg-white p-4 rounded-lg shadow-md mb-4 text-red-600">{error}</p>}
       {message && <p className="bg-white p-4 rounded-lg shadow-md mb-4 text-green-600">{message}</p>}
-      <div className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4 flex items-center justify-between flex-wrap">
-        <h2 className="text-2xl font-bold mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg> Hey {user.channelName} | <span className='text-xl text-sky-500'>{user.channelUrl}</span>
-        </h2>
-        <Link to={'invite-editor'} className="bg-gray-800 text-white hover:text-gray-200 px-3 py-2 rounded  flex items-center justify-start gap-2">Invite Editor <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-        </svg>
-        </Link>
+
+      <div className="bg-img text-white py-4 px-2 md:px-6 rounded-3xl drop-shadow-2xl mb-8">
+        <div className="flex flex-col items-center md:items-start justify-center w-full gap-3">
+          <h2 className="text-3xl font-bold mb-2 flex items-center justify-start gap-2 tracking-wider">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg> Hey <span className='font-lowballBold'>{user.channelName} !</span>
+          </h2>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <Link to={'invite-editor'} className="brandBtn w-full md:w-auto text-white hover:text-gray-200 px-5 py-2 rounded flex items-center justify-center gap-2 text-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+              </svg> Invite Editor
+            </Link>
+            <Link to={'/youtuber/all-editors'} className="brandBtnOutline w-full md:w-auto text-white hover:text-gray-200 px-5 py-2 rounded flex items-center justify-center gap-2 text-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+              </svg> View Editors with Channel Access
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg drop-shadow-2xl">
-        <h2 className="text-2xl font-bold mb-4">Pending Videos: {videos.length}</h2>
-        <hr className="border-black border-1 mb-4"></hr>
+      <div className="bg-img text-white py-4 px-6 rounded-3xl drop-shadow-2xl min-h-[25vh]">
+        <h2 className="text-2xl font-bold mb-4">🎬 <span className=''>Pending Videos:</span> {videos.length}</h2>
+        <hr className="border-white border-1 mb-4"></hr>
         {fetching ? (
           <p><Loader /></p>
         ) : (
           videos.map(video => (
-            <div key={video._id} className="bg-white p-4 rounded-lg drop-shadow-2xl mb-4">
-              <h3 className="text-xl font-bold">{video.title}</h3>
-              <button type="button" onClick={() => handleSelectVideo(video._id)} className="bg-gray-800 drop-shadow-2xl text-white w-auto py-1 px-4 mt-2 rounded flex items-center justify-center gap-2 hover:bg-gray-900">Select <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
-              </svg>
-              </button>
+            <div key={video._id} className="bg-[#141414d1] text-white p-4 rounded-lg drop-shadow-2xl mb-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                <div className="">
+                  <h3 className="text-xl tex-xl">Title: <span className='font-lowballRegular tracking-wider'> {video.title}</span></h3>
+                  <p className="text-lg tex-xl">Added by: <span className='font-lowballRegular tracking-wider'> {video.editorId.username}</span></p>
+                  <p className="text-lg tex-xl">Editor Email: <span className='font-lowballRegular tracking-wider'> {video.editorId.email}</span></p>
+                  <p className="text-lg tex-xl">Added on: <span className='font-lowballRegular tracking-wider'> {new Date(video.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}</span></p>
+                </div>
+                <button type="button" onClick={() => handleSelectVideo(video._id)} className="brandBtn drop-shadow-2xl text-white w-auto py-2 px-4 mt-2 rounded flex items-center justify-center gap-2">
+                  Select
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))
         )}
