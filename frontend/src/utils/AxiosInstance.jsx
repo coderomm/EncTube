@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-const baseURL='http://localhost:5000/api/v1';
-// const baseURL='https://yt-vdo-manager.onrender.com/api/v1';
-
 const axiosInstance = axios.create({
-    baseURL: baseURL,
+    baseURL: import.meta.env.VITE_APP_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json'
     },
