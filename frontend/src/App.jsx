@@ -1,29 +1,30 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, Suspense, lazy } from 'react';
 import { RecoilRoot } from 'recoil';
-import Home from './pages/Home';
-import YouTuberLogin from './pages/YouTuberLogin';
-import EditorLogin from './pages/EditorLogin';
-import EditorRegister from './pages/EditorRegister';
-import EditorDashboard from './components/dashboard/EditorDashboard';
-import YouTuberDashboard from './components/dashboard/YouTuberDashboard';
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import ProtectedRouteEditor from './components/ProtectedRouteEditor';
 import ProtectedRouteYouTuber from './components/ProtectedRouteYoutuber';
-import InvitationForm from './components/InvitationForm';
-import ConfirmChannel from './pages/ConfirmChannel';
-import AddVideo from './pages/AddVideo';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import ApproveVideo from './pages/ApproveVideo';
 import Loader from './components/Loader';
-import ApproveVideoFromMail from './pages/ApproveVideoFromMail';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import Features from './pages/Features';
 import Footer from './components/Footer';
-import Contact from './pages/Contact';
-import EditorsList from './pages/EditorsList';
+
+const Home = lazy(() => import('./pages/Home'));
+const YouTuberLogin = lazy(() => import('./pages/YouTuberLogin'));
+const EditorLogin = lazy(() => import('./pages/EditorLogin'));
+const EditorRegister = lazy(() => import('./pages/EditorRegister'));
+const EditorDashboard = lazy(() => import('./components/dashboard/EditorDashboard'));
+const YouTuberDashboard = lazy(() => import('./components/dashboard/YouTuberDashboard'));
+const InvitationForm = lazy(() => import('./components/InvitationForm'));
+const ConfirmChannel = lazy(() => import('./pages/ConfirmChannel'));
+const AddVideo = lazy(() => import('./pages/AddVideo'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ApproveVideo = lazy(() => import('./pages/ApproveVideo'));
+const ApproveVideoFromMail = lazy(() => import('./pages/ApproveVideoFromMail'));
+const Features = lazy(() => import('./pages/Features'));
+const Contact = lazy(() => import('./pages/Contact'));
+const EditorsList = lazy(() => import('./pages/EditorsList'));
 
 function App() {
   return (
@@ -49,33 +50,35 @@ function MainContent() {
         <Sidebar />
         <Header />
         <main>
-          <Routes>
-            <Route path="*" element={<Navigate to="/" replace />} />
-            {!user && <Route path="/" element={<Home />} />}
-            <Route path="/loader" element={<Loader />} />
-            <Route path="/us/features" element={<Features />} />
-            <Route path="/us/contact-us" element={<Contact />} />
-            <Route path="/youtuber/login" element={<YouTuberLogin />} />
-            <Route path="/editor/login" element={<EditorLogin />} />
-            <Route path="/editor/signup" element={<EditorRegister />} />
-            <Route path="/editor/confirm-channel" element={<ConfirmChannel />} />
-            <Route path="/editor/forgot-password" element={<ForgotPassword />} />
-            <Route path="/editor/reset-password" element={<ResetPassword />} />
-            {user && user.role === 'Editor' &&
-              <Route path="/" element={<Navigate to="/editor/dashboard" replace />} />}
-            <Route path="/editor/dashboard" element={<ProtectedRouteEditor><EditorDashboard /></ProtectedRouteEditor>} />
-            <Route path="/editor/channel/:id" element={<ProtectedRouteEditor><AddVideo /></ProtectedRouteEditor>} />
-            {user && user.role === 'YouTuber' &&
-              <Route path="/" element={<Navigate to="/youtuber/dashboard" replace />} />}
-            <Route path="/youtuber/dashboard" element={<ProtectedRouteYouTuber><YouTuberDashboard /></ProtectedRouteYouTuber>} />
-            <Route path="/youtuber/all-editors" element={<ProtectedRouteYouTuber><EditorsList /></ProtectedRouteYouTuber>} />
-            <Route path="/youtuber/video/:id" element={<ProtectedRouteYouTuber><ApproveVideo /></ProtectedRouteYouTuber>} />
-            <Route path="/youtuber/approve/:id" element={<ProtectedRouteYouTuber><ApproveVideoFromMail /></ProtectedRouteYouTuber>} />
-            <Route path="/youtuber/dashboard/invite-editor" element={<ProtectedRouteYouTuber>
-              <InvitationForm />
-            </ProtectedRouteYouTuber>}
-            />
-          </Routes>
+          <Suspense fallback={<Loader />}>
+            <Routes>
+              <Route path="*" element={<Navigate to="/" replace />} />
+              {!user && <Route path="/" element={<Home />} />}
+              <Route path="/loader" element={<Loader />} />
+              <Route path="/us/features" element={<Features />} />
+              <Route path="/us/contact-us" element={<Contact />} />
+              <Route path="/youtuber/login" element={<YouTuberLogin />} />
+              <Route path="/editor/login" element={<EditorLogin />} />
+              <Route path="/editor/signup" element={<EditorRegister />} />
+              <Route path="/editor/confirm-channel" element={<ConfirmChannel />} />
+              <Route path="/editor/forgot-password" element={<ForgotPassword />} />
+              <Route path="/editor/reset-password" element={<ResetPassword />} />
+              {user && user.role === 'Editor' &&
+                <Route path="/" element={<Navigate to="/editor/dashboard" replace />} />}
+              <Route path="/editor/dashboard" element={<ProtectedRouteEditor><EditorDashboard /></ProtectedRouteEditor>} />
+              <Route path="/editor/channel/:id" element={<ProtectedRouteEditor><AddVideo /></ProtectedRouteEditor>} />
+              {user && user.role === 'YouTuber' &&
+                <Route path="/" element={<Navigate to="/youtuber/dashboard" replace />} />}
+              <Route path="/youtuber/dashboard" element={<ProtectedRouteYouTuber><YouTuberDashboard /></ProtectedRouteYouTuber>} />
+              <Route path="/youtuber/all-editors" element={<ProtectedRouteYouTuber><EditorsList /></ProtectedRouteYouTuber>} />
+              <Route path="/youtuber/video/:id" element={<ProtectedRouteYouTuber><ApproveVideo /></ProtectedRouteYouTuber>} />
+              <Route path="/youtuber/approve/:id" element={<ProtectedRouteYouTuber><ApproveVideoFromMail /></ProtectedRouteYouTuber>} />
+              <Route path="/youtuber/dashboard/invite-editor" element={<ProtectedRouteYouTuber>
+                <InvitationForm />
+              </ProtectedRouteYouTuber>}
+              />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
