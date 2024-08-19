@@ -34,7 +34,17 @@ router.get('/oauth2callback', async (req, res) => {
   console.log('OAUTH2_CLIENT_ID:', OAUTH2_CLIENT_ID);
   console.log('OAUTH2_CLIENT_SECRET:', OAUTH2_CLIENT_SECRET);
   console.log('OAUTH2_REDIRECT_URL:', OAUTH2_REDIRECT_URL);
-
+  
+  console.log('Client Reinitialization:');
+  const oauth2Client = new OAuth2(
+    OAUTH2_CLIENT_ID,
+    OAUTH2_CLIENT_SECRET,
+    OAUTH2_REDIRECT_URL
+  );
+  console.log('OAUTH2_CLIENT_ID:', OAUTH2_CLIENT_ID);
+  console.log('OAUTH2_CLIENT_SECRET:', OAUTH2_CLIENT_SECRET);
+  console.log('OAUTH2_REDIRECT_URL:', OAUTH2_REDIRECT_URL);
+  
   try {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
