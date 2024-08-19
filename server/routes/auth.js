@@ -27,28 +27,9 @@ router.get('/youtuber', (req, res) => {
 });
 
 router.get('/oauth2callback', async (req, res) => {
-  console.log('CLIENT_ID:', process.env.CLIENT_ID);
-  console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
-  console.log('REDIRECT_URL:', process.env.REDIRECT_URL);
-
-  console.log('OAUTH2_CLIENT_ID:', OAUTH2_CLIENT_ID);
-  console.log('OAUTH2_CLIENT_SECRET:', OAUTH2_CLIENT_SECRET);
-  console.log('OAUTH2_REDIRECT_URL:', OAUTH2_REDIRECT_URL);
-  
-  console.log('Client Reinitialization:');
-  const oauth2Client = new OAuth2(
-    OAUTH2_CLIENT_ID,
-    OAUTH2_CLIENT_SECRET,
-    OAUTH2_REDIRECT_URL
-  );
-  console.log('OAUTH2_CLIENT_ID:', OAUTH2_CLIENT_ID);
-  console.log('OAUTH2_CLIENT_SECRET:', OAUTH2_CLIENT_SECRET);
-  console.log('OAUTH2_REDIRECT_URL:', OAUTH2_REDIRECT_URL);
-  
   try {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
-    console.log('Received tokens:', tokens);
     oauth2Client.setCredentials(tokens);
     if (!tokens.id_token) {
       throw new Error('Opps No ID token received');

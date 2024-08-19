@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// const baseURL='http://localhost:5000/api/v1';
+const baseURL='https://enctube.onrender.com/api/v1';
+
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_APP_BACKEND_URL,
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json'
     },

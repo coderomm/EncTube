@@ -27,6 +27,7 @@ const Contact = lazy(() => import('./pages/Contact'));
 const EditorsList = lazy(() => import('./pages/EditorsList'));
 
 function App() {
+  console.log(`${import.meta.env.VITE_APP_BACKEND_URL}`)
   return (
     <RecoilRoot>
       <Router>
