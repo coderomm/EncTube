@@ -21,13 +21,8 @@ dbConnect();
 app.use(express.json());
 app.use(cookieParser());
 
-const allowedOrigins = [
-  'https://yt-studio-manager.vercel.app',
-  'http://localhost:5173'
-];
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: `${process.env.FRONTEND_URL}`,
   credentials: true
 }));
 
