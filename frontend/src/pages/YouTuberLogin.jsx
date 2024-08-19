@@ -3,7 +3,7 @@ import Loader from '../components/Loader';
 
 function YouTuberLogin() {
   useEffect(() => {
-    window.location.href = `${import.meta.env.VITE_APP_BACKEND_URL}/auth/youtuber`;
+    window.location.href = 'https://enctube.onrender.com/api/v1/auth/oauth2callback';
   }, []);
 
   return (
