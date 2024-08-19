@@ -38,6 +38,7 @@ router.get('/oauth2callback', async (req, res) => {
   try {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
+    console.log('Received tokens:', tokens);
     oauth2Client.setCredentials(tokens);
     if (!tokens.id_token) {
       throw new Error('Opps No ID token received');
