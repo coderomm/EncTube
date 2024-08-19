@@ -25,8 +25,8 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center my-8 container mx-auto px-4 md:px-0 bg-[#101010]">
-            <div className="login-bg-shadow p-8 rounded-[30px] drop-shadow-2xl w-full md:w-2/3 lg:w-[35%]">
+        <div className="min-h-[80vh] flex items-center justify-center my-8 container mx-auto px-4 md:px-0 bg-img rounded-3xl text-white">
+            <div className="login-bg-shadow p-3 md:p-8 rounded-[30px] drop-shadow-2xl w-full md:w-2/3 lg:w-[35%]">
                 <h2 className="text-3xl text-center tracking-wider font-lowballRegular">Forgot Your Password</h2>
                 <p className="text-base font-semibold underline mb-8 text-center">Don&apos;t worry</p>
                 <form onSubmit={handleForgotPassword}>
@@ -36,7 +36,7 @@ const ForgotPassword = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
                         required
-                        className="w-full mb-4 px-5 border rounded-lg border-[#3f3f3f] bg-transparent h-14 text-[#999] outline-none"
+                        className="w-full mb-4 px-5 border rounded-lg border-[#3f3f3f] bg-transparent h-14 outline-none"
                     />
                     <button type="submit" className={`brandBtn text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 ${loading ? 'cursor-not-allowed' : ''}`} disabled={loading}>
                         {loading ? 'Processing...' : 'Send Reset Link'} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -44,9 +44,9 @@ const ForgotPassword = () => {
                         </svg>
                     </button>
                     {message && <p className="text-red-600 my-2 text-center">{message}</p>}
-                    <div className="flex items-center flex-wrap mt-3">
-                        <Link to={'/editor/signup'} className='flex-1 my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Don&apos;t have account?</Link>
-                        <Link to={'/editor/login'} className='flex-1 my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Already have an account?</Link>
+                    <div className="flex flex-col md:flex-row items-center flex-wrap mt-3">
+                        <Link to={'/editor/signup'} className='flex-1 md:my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Don&apos;t have account?</Link>
+                        <Link to={'/editor/login'} className='flex-1 md:my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Already have an account?</Link>
                     </div>
                 </form>
             </div>

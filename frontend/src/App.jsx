@@ -50,6 +50,7 @@ function MainContent() {
         <Header />
         <main>
           <Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
             {!user && <Route path="/" element={<Home />} />}
             <Route path="/loader" element={<Loader />} />
             <Route path="/us/features" element={<Features />} />
