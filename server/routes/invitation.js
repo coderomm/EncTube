@@ -52,7 +52,9 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
         await session.commitTransaction();
         res.status(200).send('Invitation sent successfully!');
     } catch (error) {
-        await session.abortTransaction();
+        if (session.transaction.state !== 'committed') {
+            await session.abortTransaction();
+        }
         console.error('Error sending invitation:', error);
         res.status(500).send('Error sending invitation.');
     } finally {

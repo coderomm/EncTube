@@ -63,17 +63,23 @@ router.post('/register', async (req, res) => {
                 channels: [channel._id]
             });
         }
-        await editor.save();
+        await editor.save({ session });
         channel.editors.push(editor._id);
-        await channel.save();
-        await Invitation.deleteOne({ _id: invitation._id });
+        await channel.save({ session });
+        await Invitation.deleteOne({ _id: invitation._id }, { session });
 
+        await session.commitTransaction();
         res.status(201).json({
             message: 'Editor Registration Successful',
         });
     } catch (error) {
+        if (session.transaction.state !== 'committed') {
+            await session.abortTransaction();
+        }
         console.error('Error during registration:', error);
         res.status(500).json({ message: 'Internal server error' });
+    } finally {
+        session.endSession();
     }
 });
 

@@ -174,8 +174,9 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     if (session.transaction.state !== 'committed') {
       await session.abortTransaction();
     }
-    session.endSession();
     res.status(500).send('Error uploading video');
+  } finally {
+    session.endSession();
   }
 });
 
@@ -366,10 +367,13 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
     session.endSession();
     res.status(200).send('Video uploaded successfully');
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session.transaction.state !== 'committed') {
+      await session.abortTransaction();
+    }
     console.error('Error uploading video status:', error);
     res.status(500).send('Error uploading video status');
+  } finally {
+    session.endSession();
   }
 });
 
