@@ -1,33 +1,10 @@
-##Backend Routes/Endpoints
-Authentication
--POST /login: Authenticates users (both editors and Youtubers).
--POST /register: Registers new editors via invitation.
+# YouTube Layer
 
-Video Management
--POST /video/upload: Allows editors to upload new videos.
--PUT /video/:id: Allows Youtubers to approve or reject videos.
+**YouTube Layer** is a middle-layer platform designed to streamline the video upload process for YouTubers who collaborate with external editors. It enables editors to upload videos directly to the platform, where they are securely stored until the YouTuber approves them. Upon approval, the video is automatically uploaded to the YouTube channel, removing the need for manual downloads and uploads by the YouTuber.
 
-Invitation Management
--POST /invitation/sendInvitation: Allows Youtubers to send an invitation to editors.
--POST /invitation/confirmChannel: Confirms the channel invitation for editors.
+## Features
 
-Category Management
--GET /youtube/categories: Fetches video categories from a static JSON file.
-
-##Frontend Structure
-Pages
-Home.js: The main landing page of the application.
-EditorLogin.js: Page for editors to log in.
-YoutuberDashboard.js: Dashboard for Youtubers to manage their channels and videos.
-EditorDashboard.js: Dashboard for editors to manage their video uploads.
-ConfirmChannel.js: Page for editors to confirm channel invitations.
-InvitationForm.js: Form for Youtubers to send invitations to editors.
-EditorRegister.js: Registration page for new editors via invitation link.
-Components
-Header.js: Common header component.
-Footer.js: Common footer component.
-VideoUploadForm.js: Form component for editors to upload videos.
-VideoList.js: Component to list videos with options to approve or reject.
-InvitationList.js: Component to list sent invitations and their statuses.
-CategoryDropdown.js: Dropdown component to select video categories.
-Notification.js: Component to display success or error messages.
+- **Secure Editor Access**: Editors can upload videos to the platform without having direct access to the YouTuber's channel, maintaining channel security.
+- **Approval Workflow**: The YouTuber receives a notification (e.g., WhatsApp or Slack) and must approve the video before it gets uploaded to YouTube.
+- **Flexible Hosting**: Provides an option for self-hosting on your own server (e.g., AWS) for enhanced security and control over YouTube API keys.
+- **Seamless Integration**: Utilizes YouTube’s API to automate the upload process post-approval, ensuring a smooth and efficient workflow.
