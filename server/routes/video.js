@@ -124,6 +124,16 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     });
 
     await video.save({ session });
+
+    const [videoSignedUrl] = await bucket.file(video.videoFilePath.split('/').pop()).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 30 * 60 * 1000,
+    });
+    const [thumbnailSignedUrl] = await bucket.file(video.thumbnailFilePath.split('/').pop()).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000,
+    });
+
     const emailPayload = {
       to: youtuber.email,
       subject: 'New video upload on EncTube by your editor',
@@ -361,8 +371,13 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         },
       });
       video.youtubeVideoId = uploadResponse.data.id;
+
+      await bucket.file(video.videoFilePath.split('/').pop()).delete();
+      await bucket.file(video.thumbnailFilePath.split('/').pop()).delete();
+
+      await Video.findByIdAndDelete(video._id).session(session);
+
     }
-    await video.save({ session });
     await session.commitTransaction();
     session.endSession();
     res.status(200).send('Video uploaded successfully');

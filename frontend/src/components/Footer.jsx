@@ -6,9 +6,9 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row gap-1 md:gap-16 justify-evenly items-center text-center md:text-left md:items-start">
                 <div className="flex flex-col items-center md:items-start gap-3">
                     <div className="flex items-center gap-2 sm:gap-4 sm:flex-grow">
-                        <a href="/" className="font-lowballBold text-3xl drop-shadow-2xl text-white cursor-pointer">EncTube</a>
+                        <a href="/" className="font-lowballBold text-3xl drop-shadow-2xl text-white cursor-pointer">{import.meta.env.VITE_APP_NAME}</a>
                     </div>
-                    <p className="text-lg tracking-wider text-[#999999]">Connect with us!</p>
+                    <p className="text-lg tracking-wider text-[#999999]">Connect with me!</p>
                     <div className="flex gap-3 items-center justify-center">
                         <Link to={'https://x.com/1omsharma'} className='rounded-full p-2 bg-[#1d1d1d] w-12 h-12 text-center color-[#cfcfcf] iconhover flex justify-center items-center'>
                             <svg className='fill-white w-4' enableBackground="new 0 0 24 24" height="24px" id="Layer_1" version="1.1" viewBox="0 0 24 24" width="24px" xmlSpace="preserve" xmlns="http://www.w3.org/2000/svg"><g><path d="M22.8,23.5H17c-0.2,0-0.3-0.1-0.4-0.2L12,15.3l-4.6,7.9c-0.1,0.2-0.2,0.2-0.4,0.2H1.2c-0.2,0-0.3-0.1-0.4-0.2   c-0.1-0.1-0.1-0.3,0-0.5c0-0.1,0.1-0.2,0.1-0.2L6.9,12L0.8,1.4c0-0.1-0.1-0.1-0.1-0.2c-0.1-0.2-0.1-0.4,0-0.5   C0.8,0.6,1,0.5,1.2,0.5H7c0.2,0,0.3,0.1,0.4,0.2L12,8.7l4.6-7.9c0.1-0.2,0.2-0.2,0.4-0.2h5.9c0.2,0,0.3,0.1,0.4,0.2   c0.1,0.1,0.1,0.3,0,0.5c0,0.1-0.1,0.2-0.1,0.2L17.1,12l6.1,10.6c0,0.1,0.1,0.1,0.1,0.2c0.1,0.2,0.1,0.4,0,0.5   C23.2,23.4,23,23.5,22.8,23.5z" /></g></svg>
@@ -33,16 +33,14 @@ const Footer = () => {
                 <div className="flex flex-col justify-start gap-1">
                     <h3 className="text-2xl font-semibold tracking-wider text-white">BROWSE</h3>
                     <div className="flex flex-col justify-start">
-                        <a href="" className="mt-1 text-lg tracking-wider text-[#999999]">Home</a>
-                        <a href="" className="mt-1 text-lg tracking-wider text-[#999999]">Youtuber</a>
-                        <a href="" className="mt-1 text-lg tracking-wider text-[#999999]">Editor</a>
-                        <a href="" className="mt-1 text-lg tracking-wider text-[#999999]">Features</a>
-                        <a href="" className="mt-1 text-lg tracking-wider text-[#999999]">Contact Us</a>
+                        <a href="/" className="mt-1 text-lg tracking-wider text-[#999999]">Home</a>
+                        <a href="/us/features" className="mt-1 text-lg tracking-wider text-[#999999]">Features</a>
+                        <a href="/us/contact-us" className="mt-1 text-lg tracking-wider text-[#999999]">Contact Us</a>
                     </div>
                 </div>
                 <div className="flex flex-col justify-start md:justify-between py-6 mt-6 md:mt-0 border-t border-[#1e1d1d] gap-3">
-                    <p className="text-xl font-semibold tracking-wider text-white">© EncTube 2024, Designed <a className="underline" href="https://x.com/1omsharma">CoderOm</a></p>
-                    <a href="" className="text-lg tracking-wider text-[#999999]">Privacy Policy</a>
+                    <p className="text-xl font-semibold tracking-wider text-white">© {import.meta.env.VITE_APP_NAME} 2024, Designed <a className="underline" href="https://x.com/1omsharma">CoderOm</a></p>
+                    <a href="/#" className="text-lg tracking-wider text-[#999999]">Privacy Policy</a>
                 </div>
             </div>
         </footer>

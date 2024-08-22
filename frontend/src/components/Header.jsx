@@ -1,15 +1,17 @@
 import { useSetRecoilState } from "recoil";
 import { SideBarOpen } from "../atoms/sidebarAtom";
 import Menu from "./Menu";
+import { useState } from "react";
 
 const Header = () => {
+    // const [appName] = useState(`${import.meta.env.APP_NAME}`);
     const setSideBarOpen = useSetRecoilState(SideBarOpen);
 
     return (
         <header className=" flex justify-between items-center gap-2 sm:gap-4 px-4 py-6 border-b border-[#D9D9D9] top-0 sticky
         transition-all duration-400 z-[1] rounded-b-[35px] backdrop-blur-[10px] max-w-[1400px] p-[20px_40px]">
             <div className="flex items-center gap-2 sm:gap-4 sm:flex-grow">
-                <a href="/" className="font-lowballBold text-3xl drop-shadow-2xl text-white cursor-pointer">EncTube</a>
+                <a href="/" className="font-lowballBold text-3xl drop-shadow-2xl text-white cursor-pointer">{import.meta.env.VITE_APP_NAME}</a>
             </div>
             <div className="flex gap-2 justify-end sm:flex-grow">
                 <div className="gap-2 justify-end sm:flex-grow hidden lg:flex">

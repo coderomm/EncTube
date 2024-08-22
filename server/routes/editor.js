@@ -92,11 +92,11 @@ router.post('/login', async (req, res) => {
     try {
         const editor = await Editor.findOne({ email });
         if (editor && await bcrypt.compare(password, editor.password)) {
-            const token = jwt.sign({ userId: editor._id, role: editor.role }, process.env.JWT_SECRET);
+            const token = jwt.sign({ userId: editor._id, role: editor.role, userName:editor.username, email:editor.email }, process.env.JWT_SECRET);
             res.cookie('editorToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'None',
+                sameSite: 'Strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
             res.status(200).json({

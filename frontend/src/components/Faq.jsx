@@ -3,24 +3,28 @@ import { useState } from "react";
 const Faq = () => {
     const FAQs = [
         {
-            question: "Can editors access my YouTube channel's revenue and other sensitive data?",
-            answer: "Absolutely not! YouTubePro keeps all your financial data and sensitive information completely hidden from editors, so you can collaborate without any worries."
+            question: `What is ${import.meta.env.VITE_APP_NAME}?`,
+            answer: `${import.meta.env.VITE_APP_NAME} is a platform that allows YouTubers to securely manage and approve videos uploaded by their editors before they are published on YouTube, streamlining the upload process without compromising control over their channel.`
         },
         {
-            question: "How does the one-click approval process work?",
-            answer: "Simple! When an editor uploads a video, you'll get an email with all the details. Just click the 'Approve & Publish' button, and your video goes live on YouTube—no need to log in!"
+            question: `How does the one-click approval process work?`,
+            answer: `Simple! When an editor uploads a video, you'll get an email with all the details. Just click the 'Approve & Publish' button, and your video goes live on YouTube—no need to log in!`
         },
         {
-            question: "What if I own multiple YouTube channels?",
-            answer: "Each account is tied to a single channel. If you have multiple channels, just create separate accounts for each, ensuring everything stays organized and secure."
+            question: `How does ${import.meta.env.VITE_APP_NAME} ensure my channel's security?`,
+            answer: `${import.meta.env.VITE_APP_NAME} only uploads videos to YouTube after you’ve reviewed and approved them. Your YouTube API keys are securely stored, and you have the option to self-host the platform for added security.`
         },
         {
-            question: "Can editors work on multiple channels at once?",
-            answer: "Yes, editors can be associated with multiple channels. They can easily switch between channels from their dashboard, making multitasking a breeze."
+            question: `Can I use ${import.meta.env.VITE_APP_NAME} without giving full access to my YouTube channel?`,
+            answer: `Yes! ${import.meta.env.VITE_APP_NAME} is designed specifically to allow editors to upload videos without having full access to your channel. You maintain full control, approving every video before it’s published.`
         },
         {
-            question: "Is it possible for editors to sign up without an invitation?",
-            answer: "Nope! Editors can only access your channel through an invitation sent by you, ensuring that only trusted individuals can contribute to your content."
+            question: `Is ${import.meta.env.VITE_APP_NAME} compatible with all types of YouTube channels?`,
+            answer: `Yes, ${import.meta.env.VITE_APP_NAME} can be used by any YouTube channel, whether it’s a personal vlogging channel or a large, multi-editor production team.`
+        },
+        {
+            question: `Can I self-host ${import.meta.env.VITE_APP_NAME} on my own server?`,
+            answer: `Absolutely. We are working on this. For those who prefer to maintain full control over their data, ${import.meta.env.VITE_APP_NAME} offers the option to self-host on a trusted server like AWS, ensuring your API keys and content are always secure.`
         }
     ];
     const [activeIndex, setActiveIndex] = useState(null);

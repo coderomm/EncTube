@@ -5,10 +5,10 @@ const Features = () => {
     return (
         <>
             <section className="mx-1 mt-2 md:mx-10 md:mt-4 p-8 px-2 md:p-16 md:py-7 text-center">
-                <h1 className="text-4xl md:text-6xl text-white font-lowballBold tracking-wider">About EncTube</h1>
-                <h3 className="text-3xl md:text-3xl text-white font-lowballThin tracking-wider mt-3">🎬 EncTube: Edit with Control, Publish with Confidence! 🚀</h3>
+                <h1 className="text-4xl md:text-6xl text-white font-lowballBold tracking-wider">About {import.meta.env.VITE_APP_NAME}</h1>
+                <h3 className="text-3xl md:text-3xl text-white font-lowballThin tracking-wider mt-3">🎬 {import.meta.env.VITE_APP_NAME}: Control Your Content, Simplify Your Workflow, Upload Safely! 🚀</h3>
                 <div className="text-center text-[#e2e2e2] text-xl tracking-wide mt-2">
-                    <p>Empower your YouTube channel with seamless collaboration while keeping your sensitive data under wraps. With EncTube, editors can create and upload content without ever touching your private metrics, letting you review, tweak, and publish videos effortlessly.</p>
+                    <p>{import.meta.env.VITE_APP_NAME} is a platform designed to bridge the gap between YouTubers and their video editors, ensuring a seamless and secure video upload process. With {import.meta.env.VITE_APP_NAME}, YouTubers can maintain full control over their channels by approving videos before they are published, without the hassle of downloading and re-uploading large files. Our platform provides a safe space where editors can upload their work, and YouTubers can easily manage and approve content from anywhere in the world.</p>
                 </div>
             </section>
             <section className="mx-1 mt-2 md:mx-10 md:mt-4 p-8 px-2 md:p-16 md:py-7 text-center">
@@ -16,6 +16,7 @@ const Features = () => {
                 <div className="text-center text-[#e2e2e2] text-xl tracking-wide mt-2">
                     <ul className='text-left'>
                         <li className='mt-3'>- 🔒 Full Control, No Worries: Keep your revenue and sensitive data hidden while editors focus on what they do best—creating amazing content.</li>
+                        <li className='mt-3'>- ⬇️⬆️ Eliminate manual downloads and uploads.</li>
                         <li className='mt-3'>- 📧 Instant Approval, Zero Hassles: Approve and publish videos directly from your email with just one click. Streamlined and efficient.</li>
                         <li className='mt-3'>- 📂 All Your Channels, One Place: Editors can manage multiple channels from a single account, each with its own secure dashboard.</li>
                         <li className='mt-3'>- 📣 Feedback Loop: Review, suggest edits, and collaborate without losing control. Every video is polished to perfection before going live.</li>
