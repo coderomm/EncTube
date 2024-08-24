@@ -70,12 +70,15 @@ function EditorsList() {
                     <div className="mt-4">
                         <ul className="text-white rounded-lg drop-shadow-2xl">
                             {editors.map((editor) => (
-                                <li key={editor.editorId} className="mb-4 bg-[#1d1d1d] p-2 rounded-lg">
-                                    <p className='md:text-xl'><span className='text-[#999]'>- Editor name: </span><strong className='text-2xl'>{editor.editorName}</strong></p>
-                                    <p className='md:text-xl'><span className='text-[#999]'>- Mail @: </span>{editor.editorEmail}</p>
-                                    <p className='md:text-xl'><span className='text-[#999]'>- Total Videos: </span>{editor.totalVideos}</p>
-                                    <p className='md:text-xl'><span className='text-[#999]'>- Approved Videos: </span>{editor.approvedVideos}</p>
-                                </li>
+                                <div key={editor.editorId} className="flex flex-col md:flex-row justify-between bg-[#1d1d1d] mb-4 p-2 rounded-lg">
+                                    <li className="">
+                                        <p className='md:text-xl'><span className='text-[#999]'>- Editor name: </span><strong className=''>{editor.editorName}</strong></p>
+                                        <p className='md:text-xl'><span className='text-[#999]'>- Mail @: </span>{editor.editorEmail}</p>
+                                        <p className='md:text-xl'><span className='text-[#999]'>- Total Videos: </span>{editor.totalVideos}</p>
+                                        <p className='md:text-xl'><span className='text-[#999]'>- Approved Videos: </span>{editor.approvedVideos}</p>
+                                    </li>
+
+                                </div>
                             ))}
                         </ul>
                     </div>

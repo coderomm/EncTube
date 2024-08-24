@@ -11,6 +11,7 @@ const Editor = require('../models/Editor');
 const Invitation = require('../models/Invitation');
 const Channel = require('../models/Channel');
 const { authenticateEditor } = require('../middleware/authMiddleware');
+const { sendResetPasswordEmail } = require('../utils/sendResetPasswordEmail');
 
 const registerSchema = zod.object({
     token: zod.string(),
@@ -19,8 +20,8 @@ const registerSchema = zod.object({
 });
 
 const loginSchema = zod.object({
-    email: zod.string().email('Email required'),
-    password: zod.string().min(6)
+    email: zod.string().email('Valid email address required.'),
+    password: zod.string().min(6, 'Password must be at least 6 characters long')
 });
 
 router.post('/register', async (req, res) => {
@@ -31,7 +32,11 @@ router.post('/register', async (req, res) => {
     if (!validationResult.success) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ message: 'Invalid input data', errors: validationResult.error.errors });
+        const errors = validationResult.error.errors.map(error => ({
+            field: error.path[0],
+            message: error.message
+        }));
+        return res.status(400).json({ message: 'Invalid input data', errors });
     }
 
     const { token, username, password } = req.body;
@@ -92,7 +97,7 @@ router.post('/login', async (req, res) => {
     try {
         const editor = await Editor.findOne({ email });
         if (editor && await bcrypt.compare(password, editor.password)) {
-            const token = jwt.sign({ userId: editor._id, role: editor.role, userName:editor.username, email:editor.email }, process.env.JWT_SECRET);
+            const token = jwt.sign({ userId: editor._id, role: editor.role, userName: editor.username, email: editor.email }, process.env.JWT_SECRET);
             res.cookie('editorToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -140,24 +145,13 @@ router.post('/forgot-password', async (req, res) => {
 
         const token = crypto.randomBytes(20).toString('hex');
         editor.resetPasswordToken = token;
-        editor.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        editor.resetPasswordExpires = Date.now() + 7200000; // 2 hour
         await editor.save();
 
         const resetUrl = `${process.env.FRONTEND_URL}/editor/reset-password?token=${token}`;
 
-        const emailPayload = {
-            to: email,
-            subject: 'Password Reset Request',
-            text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.
-
-               Please click on the following link, or paste this into your browser to complete the process within one hour of receiving it:
-
-               ${resetUrl}`
-        };
-
-        await axios.post(`${process.env.SMTP_URL}`, emailPayload);
-
-        res.status(200).send('Reset link sent');
+        await sendResetPasswordEmail(editor.email, editor.username, 6, resetUrl);
+        res.status(200).send('Password reset link sent !');
     } catch (error) {
         res.status(500).send('Error in sending reset link');
     }

@@ -3,13 +3,13 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const Editor = require('../models/Editor');
-const sendInvitationEmail = require('../utils/sendInvitationEmail');
+const { sendInvitationEmail } = require('../utils/sendInvitationEmail');
 const Invitation = require('../models/Invitation');
 const { authenticateYoutuber } = require('../middleware/authMiddleware');
 const Channel = require('../models/Channel');
-const axios = require('axios');
 const { z } = require('zod');
 const mongoose = require('mongoose');
+const Youtuber = require('../models/Youtuber');
 
 const invitationSchema = z.object({
     editorEmail: z.string().email(),
@@ -30,25 +30,18 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
         const youtuberId = req.user.userId;
         await Invitation.create([{ editorEmail, token, expiresAt, youtuberId }], { session });
 
+        const youtuber = await Youtuber.findById(req.user.userId).session(session);
+        if (!youtuber) throw new Error('YouTuber not found');
+
         let invitationLink;
         if (editor) {
             invitationLink = `${process.env.FRONTEND_URL}/editor/confirm-channel?email=${editorEmail}&token=${token}`;
         } else {
             invitationLink = `${process.env.FRONTEND_URL}/editor/signup?email=${editorEmail}&token=${token}`;
         }
-        // const response = await sendInvitationEmail(editorEmail, 'Invitation to Join as an Editor', `Please register/confirm using the following link: ${invitationLink}`);
 
-        const emailPayload = {
-            to: editorEmail,
-            subject: 'Invitation to Join as an Editor',
-            text: `
-            Hello,
+        await sendInvitationEmail(editorEmail, editorEmail, 4, youtuber.channelName, editorEmail, invitationLink);
 
-            You have been invited to join as a editor, please register/confirm by clicking on the link below:
-            
-            ${invitationLink}`
-        };
-        await axios.post('https://send-anonymous-mail.onrender.com/api/v1/send-email', emailPayload);
         await session.commitTransaction();
         res.status(200).send('Invitation sent successfully!');
     } catch (error) {

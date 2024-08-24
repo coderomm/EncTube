@@ -49,9 +49,9 @@ const InvitationForm = () => {
     };
 
     return (
-        <div className="bg-img min-h-80 container mx-auto my-8 px-4 md:px-0 flex items-center justify-center">
-            <div className="text-white p-4 rounded-lg drop-shadow-2xl">
-                <h2 className="text-2xl font-bold mb-8 flex flex-col md:flex-row items-center justify-start gap-2 w-full">
+        <section className="my-8 container mx-auto px-2 md:px-0">
+            <div className="bg-img rounded-3xl text-white py-4 px-2 md:px-6">
+                <h2 className="text-2xl text-center font-bold mb-8 flex flex-col md:flex-row items-center justify-center gap-2 w-full">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
                     </svg>
@@ -74,9 +74,9 @@ const InvitationForm = () => {
                     </button>
                     <Link to={'/youtuber/dashboard'} className='flex-1 my-3 underline font-semibold text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Go to dashboard</Link>
                 </form>
-                {message && <p className='w-full text-center my-3 font-bold text-white'>{message}</p>}
+                {message && <p className='w-full text-center my-3 text-white'>{message}</p>}
             </div>
-        </div>
+        </section>
     );
 };
 

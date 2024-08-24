@@ -6,7 +6,9 @@ apiKey.apiKey = 'xkeysib-3477512aa74d1ac6448fe78644028cc77e5b45ec933c451cac0f28a
 
 var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-async function sendInvitationEmail(toEmail, toName, templateId, channelName, editorName, invitationLink) {
+async function sendVideoAddedEmail(toEmail, toName, templateId, channelName, channelURL, editorName, editorMail,
+  videoTitle, privacyStatus, thumbnail, video, dashboardApprovalLink, oneClickApprovalLink
+) {
   var sendSmtpEmail = {
     to: [{
       email: toEmail,
@@ -15,8 +17,15 @@ async function sendInvitationEmail(toEmail, toName, templateId, channelName, edi
     templateId: templateId,
     params: {
       channelName: channelName,
+      channelURL: channelURL,
       editorName: editorName,
-      invitationLink: invitationLink
+      editorMail: editorMail,
+      videoTitle: videoTitle,
+      privacyStatus: privacyStatus,
+      thumbnail: thumbnail,
+      video: video,
+      dashboardApprovalLink: dashboardApprovalLink,
+      oneClickApprovalLink: oneClickApprovalLink,
     },
     headers: {
       'X-Mailin-custom': 'custom_header_1:custom_value_1|custom_header_2:custom_value_2'
@@ -31,4 +40,4 @@ async function sendInvitationEmail(toEmail, toName, templateId, channelName, edi
   }
 }
 
-module.exports = { sendInvitationEmail };
+module.exports = { sendVideoAddedEmail };

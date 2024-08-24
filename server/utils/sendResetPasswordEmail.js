@@ -6,7 +6,7 @@ apiKey.apiKey = 'xkeysib-3477512aa74d1ac6448fe78644028cc77e5b45ec933c451cac0f28a
 
 var apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-async function sendInvitationEmail(toEmail, toName, templateId, channelName, editorName, invitationLink) {
+async function sendResetPasswordEmail(toEmail, toName, templateId, resetPasswordLink) {
   var sendSmtpEmail = {
     to: [{
       email: toEmail,
@@ -14,9 +14,8 @@ async function sendInvitationEmail(toEmail, toName, templateId, channelName, edi
     }],
     templateId: templateId,
     params: {
-      channelName: channelName,
-      editorName: editorName,
-      invitationLink: invitationLink
+      editorName: toName,
+      resetPasswordLink: resetPasswordLink
     },
     headers: {
       'X-Mailin-custom': 'custom_header_1:custom_value_1|custom_header_2:custom_value_2'
@@ -31,4 +30,4 @@ async function sendInvitationEmail(toEmail, toName, templateId, channelName, edi
   }
 }
 
-module.exports = { sendInvitationEmail };
+module.exports = { sendResetPasswordEmail };

@@ -14,6 +14,7 @@ const Editor = require('../models/Editor');
 const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const { bucket } = require('../utils/firebaseConfig');
+const { sendVideoAddedEmail } = require('../utils/sendVideoAddedEmail');
 const upload = multer({ storage: multer.memoryStorage() });
 
 const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
@@ -127,54 +128,16 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
 
     const [videoSignedUrl] = await bucket.file(video.videoFilePath.split('/').pop()).getSignedUrl({
       action: 'read',
-      expires: Date.now() + 30 * 60 * 1000,
+      expires: Date.now() + 240 * 60 * 1000,
     });
     const [thumbnailSignedUrl] = await bucket.file(video.thumbnailFilePath.split('/').pop()).getSignedUrl({
       action: 'read',
-      expires: Date.now() + 15 * 60 * 1000,
+      expires: Date.now() + 240 * 60 * 1000,
     });
-
-    const emailPayload = {
-      to: youtuber.email,
-      subject: 'New video upload on EncTube by your editor',
-      text: `Hello ${youtuber.channelName},
-
-        A new video titled - "${title}" has been uploaded by your editor ${editor.username} (${editor.email})
-
-        Video Details:
-        Title - ${title},
-        Description - ${description},
-        Channel - ${youtuber.channelName} (${youtuber.channelUrl}),
-        Tags - ${tags},
-        Video Category Id - ${categoryId},
-        Default Language - ${defaultLanguage},
-        Privacy Status - ${privacyStatus},
-        Notify Subscribers - ${notifySubscribers},
-        Embeddable - ${embeddable},
-        License - ${license},
-        Public Stats Viewable - ${publicStatsViewable},
-        Publish At - ${new Date(publishAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })},
-        Self Declared Made For Kids - ${selfDeclaredMadeForKids},
-
-        To Approve the uploaded video, please click on the following link:
-
-        ${process.env.FRONTEND_URL}/youtuber/approve/${video._id}
-        
-        If you didn't found this relevent to you, please ignore this email and reply your response to this email.
-        
-        Thank you,
-
-        The EncTube Team`
-    };
-
-    try {
-      await axios.post(`${process.env.SMTP_URL}`, emailPayload);
-    } catch (emailError) {
-      console.error('Error sending email notification:', emailError);
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(500).send('Error sending email notification');
-    }
+    const dashboardApprovalLink = `${process.env.FRONTEND_URL}/youtuber/video/${video._id}`;
+    const oneClickApprovalLink = `${process.env.FRONTEND_URL}/youtuber/approve/${video._id}`;
+    await sendVideoAddedEmail(youtuber.email, youtuber.channelName, 5, youtuber.channelName, youtuber.channelUrl, editor.username, editor.email,
+      title, privacyStatus, thumbnailSignedUrl, videoSignedUrl, dashboardApprovalLink, oneClickApprovalLink);
 
     await session.commitTransaction();
     session.endSession();
