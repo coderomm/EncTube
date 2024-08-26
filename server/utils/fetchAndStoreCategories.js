@@ -9,7 +9,7 @@ async function fetchAndStoreCategories() {
     });
     const response = await youtube.videoCategories.list({
       part: 'snippet',
-      regionCode: 'US'
+      regionCode: 'IN'
     });
 
     const categories = response.data.items.map(item => ({
@@ -17,7 +17,7 @@ async function fetchAndStoreCategories() {
       title: item.snippet.title
     }));
 
-    fs.writeFileSync('videoCategories.json', JSON.stringify(categories, null, 2));
+    fs.writeFileSync('videoCategories2.json', JSON.stringify(categories, null, 2));
     console.log('Categories fetched and stored successfully.');
   } catch (error) {
     console.error('Error fetching categories:', error);

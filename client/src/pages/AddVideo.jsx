@@ -186,7 +186,7 @@ const AddVideo = () => {
                 <div className="bg-img rounded-2xl text-white p-4">
                     <form onSubmit={handleUpload}>
                         <h2 className="text-2xl font-lowballRegular tracking-widest mb-1">🎬 Add/Upload New Video</h2>
-                        <p href="" className=" mb-12 text-lg tracking-wider text-[#999999]">Upload your video and enter all the details for review, just like in YouTube Studio.</p>
+                        <p className=" mb-12 text-lg tracking-wider text-[#999999]">Upload your video and enter all the details for review, just like in YouTube Studio.</p>
                         <label className="label mt-4 mb-1 ms-1">Enter the title of the video</label>
                         <input
                             type="text"

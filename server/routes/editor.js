@@ -10,18 +10,22 @@ const zod = require('zod');
 const Editor = require('../models/Editor');
 const Invitation = require('../models/Invitation');
 const Channel = require('../models/Channel');
-const { authenticateEditor } = require('../middleware/authMiddleware');
+const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
 const { sendResetPasswordEmail } = require('../utils/sendResetPasswordEmail');
 
 const registerSchema = zod.object({
     token: zod.string(),
-    username: zod.string().min(3),
-    password: zod.string().min(6)
+    username: zod.string().min(4, 'Username must be at least 4 characters long.'),
+    password: zod.string()
+        .min(6, 'Password must be at least 6 characters long.')
+        .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, 'Password must include at least one letter and one number.')
 });
 
 const loginSchema = zod.object({
     email: zod.string().email('Valid email address required.'),
-    password: zod.string().min(6, 'Password must be at least 6 characters long')
+    password: zod.string()
+        .min(6, 'Password must be at least 6 characters long.')
+        .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, 'Password must include at least one letter and one number.')
 });
 
 router.post('/register', async (req, res) => {
@@ -36,14 +40,13 @@ router.post('/register', async (req, res) => {
             field: error.path[0],
             message: error.message
         }));
-        return res.status(400).json({ message: 'Invalid input data', errors });
+        return res.status(400).json({ message: 'Validation failed', errors });
     }
 
     const { token, username, password } = req.body;
     const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
     if (!invitation) {
         await session.abortTransaction();
-        session.endSession();
         return res.status(400).send('Invalid or expired token.');
     }
 
@@ -51,7 +54,6 @@ router.post('/register', async (req, res) => {
         const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
         if (!channel) {
             await session.abortTransaction();
-            session.endSession();
             return res.status(404).send('Channel not found.');
         }
 
@@ -91,7 +93,11 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const validationResult = loginSchema.safeParse(req.body);
     if (!validationResult.success) {
-        return res.status(400).json({ message: 'Invalid input data', errors: validationResult.error.errors });
+        const errors = validationResult.error.errors.map(error => ({
+            field: error.path[0],
+            message: error.message
+        }));
+        return res.status(400).json({ message: 'Validation failed', errors });
     }
     const { email, password } = req.body;
     try {
@@ -116,25 +122,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/channels', authenticateEditor, async (req, res) => {
-    try {
-        const channels = await Channel.find({ editors: req.user.userId }).populate('youtuber', 'channelName channelUrl');
-        res.status(200).json(channels);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching channels' });
-    }
-});
-
-router.get('/video/pending', authenticateEditor, async (req, res) => {
-    const { channelId } = req.query;
-    try {
-        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
-        res.status(200).json(pendingVideos);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching pending videos' });
-    }
-});
-
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
@@ -150,7 +137,7 @@ router.post('/forgot-password', async (req, res) => {
 
         const resetUrl = `${process.env.FRONTEND_URL}/editor/reset-password?token=${token}`;
 
-        await sendResetPasswordEmail(editor.email, editor.username, 6, resetUrl);
+        await sendResetPasswordEmail(editor.email, editor.username, 7, resetUrl);
         res.status(200).send('Password reset link sent !');
     } catch (error) {
         res.status(500).send('Error in sending reset link');
@@ -177,6 +164,52 @@ router.post('/reset-password', async (req, res) => {
         res.status(200).send('Password reset successful');
     } catch (error) {
         res.status(500).send('Error in resetting password');
+    }
+});
+
+router.get('/channels', authenticateEditor, async (req, res) => {
+    try {
+        const channels = await Channel.find({ editors: req.user.userId }).populate('youtuber', 'channelName channelUrl');
+        res.status(200).json(channels);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching channels' });
+    }
+});
+
+router.get('/all-editors', authenticateYoutuber, async (req, res) => {
+    try {
+        let channel = await Channel.findOne({ youtuber: req.user.userId }).populate('editors');
+        if (!channel) {
+            return res.status(404).json({ message: 'Channel not found' });
+        }
+
+        const editorStats = await Promise.all(channel.editors.map(async (editor) => {
+            const totalVideos = await Video.countDocuments({ editorId: editor._id, channelId: channel._id });
+            const approvedVideos = await Video.countDocuments({ editorId: editor._id, channelId: channel._id, status: 'Approved' });
+
+            return {
+                editorId: editor._id,
+                editorName: editor.username,
+                editorEmail: editor.email,
+                totalVideos,
+                approvedVideos
+            };
+        }));
+
+        res.status(200).json(editorStats);
+    } catch (error) {
+        console.error('Error fetching editors:', error);
+        res.status(500).json({ message: 'Error fetching editors' });
+    }
+});
+
+router.get('/video/pending', authenticateEditor, async (req, res) => {
+    const { channelId } = req.query;
+    try {
+        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
+        res.status(200).json(pendingVideos);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching pending videos' });
     }
 });
 

@@ -136,11 +136,10 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     });
     const dashboardApprovalLink = `${process.env.FRONTEND_URL}/youtuber/video/${video._id}`;
     const oneClickApprovalLink = `${process.env.FRONTEND_URL}/youtuber/approve/${video._id}`;
-    await sendVideoAddedEmail(youtuber.email, youtuber.channelName, 5, youtuber.channelName, youtuber.channelUrl, editor.username, editor.email,
+    await sendVideoAddedEmail(youtuber.email, youtuber.channelName, 9, youtuber.channelName, youtuber.channelUrl, editor.username, editor.email,
       title, privacyStatus, thumbnailSignedUrl, videoSignedUrl, dashboardApprovalLink, oneClickApprovalLink);
 
     await session.commitTransaction();
-    session.endSession();
     res.status(201).send(`Video uploaded successfully. Video ID: ${video._id}`);
   } catch (error) {
     console.error('Error uploading video:', error);
@@ -177,6 +176,7 @@ router.get('/editor/pending', authenticateEditor, async (req, res) => {
 });
 
 router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
+  console.log('fetch pending vdo, req.user : ', req.user)
   const userId = req.user.userId;
   const userRole = req.user.role;
   try {
@@ -240,23 +240,25 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
     const video = await Video.findById(req.params.id).session(session);
     if (!video) {
       await session.abortTransaction();
-      session.endSession();
       return res.status(404).send('Video not found');
     }
 
     const action = req.query.status || req.body.status;
     if (!action) {
       await session.abortTransaction();
-      session.endSession();
       return res.status(400).send('Action or status is required');
     }
+
+    if (req.body.title) video.title = req.body.title;
+    if (req.body.description) video.description = req.body.description;
+    if (req.body.tags) video.tags = req.body.tags;
+    if (req.body.privacyStatus) video.privacyStatus = req.body.privacyStatus;
 
     video.status = action;
     if (video.status === 'Approved') {
       const youtuber = await Youtuber.findById(video.youtuberId).session(session);
       if (!youtuber) {
         await session.abortTransaction();
-        session.endSession();
         return res.status(404).send('Youtuber not found');
       }
       oAuth2Client.setCredentials({
@@ -264,16 +266,28 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         refresh_token: youtuber.refreshToken
       });
 
+      if (oAuth2Client.isTokenExpiring()) {
+        try {
+          const tokens = await oAuth2Client.refreshAccessToken();
+          oAuth2Client.setCredentials(tokens.credentials);
+          youtuber.accessToken = tokens.credentials.access_token;
+          youtuber.refreshToken = tokens.credentials.refresh_token || youtuber.refreshToken;
+          await youtuber.save({ session });
+        } catch (error) {
+          console.error('Error refreshing access token:', error);
+        }
+      }
+
       const youtube = google.youtube({ version: 'v3', auth: oAuth2Client });
 
       const [videoSignedUrl] = await bucket.file(video.videoFilePath.split('/').pop()).getSignedUrl({
         action: 'read',
-        expires: Date.now() + 15 * 60 * 1000,
+        expires: Date.now() + 72 * 60 * 60 * 1000
       });
 
       const [thumbnailSignedUrl] = await bucket.file(video.thumbnailFilePath.split('/').pop()).getSignedUrl({
         action: 'read',
-        expires: Date.now() + 15 * 60 * 1000,
+        expires: Date.now() + 72 * 60 * 60 * 1000
       });
 
       const videoResponse = await axios({
@@ -287,69 +301,66 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         method: 'GET',
         responseType: 'stream',
       });
-
-      let publishAtUTC;
-      console.log('video.publishAt:', video.publishAt)
-      if (typeof video.publishAt === 'string') {
-        publishAtUTC = video.publishAt.replace('+00:00', 'Z');
-      } else if (video.publishAt instanceof Date) {
-        publishAtUTC = video.publishAt.toISOString();
-      } else {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).send('Invalid publishAt date format');
-      }
-      console.log('publishAtUTC:', publishAtUTC)
-
-      const uploadResponse = await youtube.videos.insert({
-        part: 'snippet,status',
-        requestBody: {
-          snippet: {
-            title: video.title,
-            description: video.description,
-            tags: video.tags,
-            categoryId: video.categoryId,
-            defaultLanguage: video.defaultLanguage,
-            thumbnails: {
-              default: {
-                url: thumbnailSignedUrl
+      console.log('video data going to upload to youtube is : ', video)
+      try {
+        const uploadResponse = await youtube.videos.insert({
+          part: 'snippet,status',
+          requestBody: {
+            snippet: {
+              title: video.title,
+              description: video.description,
+              tags: video.tags,
+              categoryId: video.categoryId,
+              defaultLanguage: video.defaultLanguage,
+              thumbnails: {
+                default: {
+                  url: thumbnailSignedUrl
+                }
               }
+            },
+            status: {
+              privacyStatus: video.privacyStatus,
+              embeddable: video.embeddable,
+              license: video.license,
+              publicStatsViewable: video.publicStatsViewable,
+              // publishAt: publishAtUTC,
+              selfDeclaredMadeForKids: video.selfDeclaredMadeForKids,
+              notifySubscribers: video.notifySubscribers
+            },
+          },
+          media: {
+            body: videoResponse.data,
+            thumbnail: {
+              body: thumbnailResponse.data
             }
           },
-          status: {
-            privacyStatus: video.privacyStatus,
-            embeddable: video.embeddable,
-            license: video.license,
-            publicStatsViewable: video.publicStatsViewable,
-            // publishAt: publishAtUTC,
-            selfDeclaredMadeForKids: video.selfDeclaredMadeForKids,
-            notifySubscribers: video.notifySubscribers
-          },
-        },
-        media: {
-          body: videoResponse.data,
-          thumbnail: {
-            body: thumbnailResponse.data
-          }
-        },
-      });
-      video.youtubeVideoId = uploadResponse.data.id;
+        });
+        video.youtubeVideoId = uploadResponse.data.id;
+        await bucket.file(video.videoFilePath.split('/').pop()).delete();
+        await bucket.file(video.thumbnailFilePath.split('/').pop()).delete();
 
+        await Video.findByIdAndDelete(video._id).session(session);
+        await session.commitTransaction();
+        res.status(200).send('Video uploaded successfully');
+      } catch (error) {
+        console.error('Error uploading video to YouTube:', error);
+        await session.abortTransaction(); // Rollback any changes
+        res.status(500).send('Error uploading video to YouTube');
+      }
+    } else if (video.status === 'Rejected') {
       await bucket.file(video.videoFilePath.split('/').pop()).delete();
       await bucket.file(video.thumbnailFilePath.split('/').pop()).delete();
 
       await Video.findByIdAndDelete(video._id).session(session);
-
+      await session.commitTransaction();
+      res.status(200).send('Video deleted successfully');
     }
-    await session.commitTransaction();
-    session.endSession();
-    res.status(200).send('Video uploaded successfully');
   } catch (error) {
     if (session.transaction.state !== 'committed') {
       await session.abortTransaction();
     }
-    console.error('Error uploading video status:', error);
-    res.status(500).send('Error uploading video status');
+    console.error('Error uploading video to youtube:', error);
+    res.status(500).send('Error uploading video to youtube');
   } finally {
     session.endSession();
   }

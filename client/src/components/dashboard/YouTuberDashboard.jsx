@@ -3,7 +3,6 @@ import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Loader from '../Loader';
-import BackButton from '../BackButton';
 
 function YouTuberDashboard() {
   const { user, loading } = useContext(AuthContext);
@@ -52,7 +51,6 @@ function YouTuberDashboard() {
 
   return (
     <section className="my-8 container mx-auto px-2 md:px-0">
-      <BackButton/>
       {error && <p className="bg-white p-4 rounded-lg shadow-md mb-4 text-red-600">{error}</p>}
       {message && <p className="bg-white p-4 rounded-lg shadow-md mb-4 text-green-600">{message}</p>}
 

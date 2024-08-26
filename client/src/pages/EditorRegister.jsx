@@ -22,22 +22,32 @@ function EditorRegister() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            const response = await register(token, username, email, password);
-            if (response.status === 201) {
-                setMessage(response.message);
-                navigate('/editor/login');
-            } else {
-                setMessage(response.message);
-            }
-        } catch (error) {
-            console.error('Registration failed:', error);
-            setMessage('Registration failed. Please try again.');
-        } finally {
-            setLoading(false);
-            setTimeout(() => setMessage(''), 3000)
+
+        // Frontend validation
+        if (username.length < 4) {
+            setMessage('Username must be at least 4 characters long.');
+            setTimeout(() => setMessage(''), 3000);
+            return;
         }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            setMessage('Password must be at least 6 characters long and include at least one letter and one number.');
+            setTimeout(() => setMessage(''), 3000);
+            return;
+        }
+
+        setLoading(true);
+
+        const response = await register(token, username, email, password);
+        setLoading(false);
+
+        setMessage(response.message);
+        if (response.status === 201) {
+            navigate('/editor/login');
+        }
+
+        setTimeout(() => setMessage(''), 3000);
     };
 
     return (
@@ -51,14 +61,14 @@ function EditorRegister() {
                         onChange={e => setUsername(e.target.value)}
                         placeholder="Username"
                         required
-                        className="w-full mb-4 px-5 border rounded-lg border-[#3f3f3f] bg-transparent h-14 outline-none"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg border-[#3f3f3f] bg-transparent outline-none text-lg"
                     />
                     <input
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         placeholder="Email"
-                        className="w-full mb-4 px-5 border rounded-lg border-[#3f3f3f] bg-transparent h-14 outline-none"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg border-[#3f3f3f] bg-transparent outline-none text-lg"
                         disabled
                     />
                     <input
@@ -66,7 +76,7 @@ function EditorRegister() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         placeholder="Password"
-                        className="w-full mb-4 px-5 border rounded-lg border-[#3f3f3f] bg-transparent h-14 outline-none"
+                        className="w-full mb-4 px-4 py-2 border rounded-lg border-[#3f3f3f] bg-transparent outline-none text-lg"
                     />
                     <button type="submit" className={`brandBtn text-white w-full py-2 rounded-lg flex items-center justify-center gap-2 ${loading ? 'cursor-not-allowed' : ''}`} disabled={loading}>
                         {loading ? 'Processing...' : 'Signup'} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -75,8 +85,8 @@ function EditorRegister() {
                     </button>
                     {message && <p className="text-white my-2 text-center">{message}</p>}
                     <div className="flex items-center flex-wrap mt-3">
-                        <Link to={'/editor/login'} className='flex-1 my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Already have an account?</Link>
-                        <Link to={'/editor/forgot-password'} className='flex-1 my-3 underline font-semibold text-white hover:text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Forgot Password?</Link>
+                        <Link to={'/editor/login'} className='flex-1 my-3 underline hover:text-white text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Already have an account?</Link>
+                        <Link to={'/editor/forgot-password'} className='flex-1 my-3 underline hover:text-white text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Forgot Password?</Link>
                     </div>
                 </form>
             </div>

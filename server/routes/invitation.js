@@ -40,7 +40,7 @@ router.post('/sendInvitation', authenticateYoutuber, async (req, res) => {
             invitationLink = `${process.env.FRONTEND_URL}/editor/signup?email=${editorEmail}&token=${token}`;
         }
 
-        await sendInvitationEmail(editorEmail, editorEmail, 4, youtuber.channelName, editorEmail, invitationLink);
+        await sendInvitationEmail(editorEmail, editorEmail, 10, youtuber.channelName, editorEmail, invitationLink);
 
         await session.commitTransaction();
         res.status(200).send('Invitation sent successfully!');
@@ -61,35 +61,49 @@ router.post('/confirmChannel', async (req, res) => {
         return res.status(400).json({ message: 'Invalid request data' });
     }
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } });
+        const invitation = await Invitation.findOne({ token, expiresAt: { $gt: Date.now() } }).session(session);
         if (!invitation) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({ message: 'Invalid or expired token.' });
         }
 
-        const editor = await Editor.findOne({ email: invitation.editorEmail });
-        const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
+        const editor = await Editor.findOne({ email: invitation.editorEmail }).session(session);
+        const channel = await Channel.findOne({ youtuber: invitation.youtuberId }).session(session);
 
         if (!editor || !channel) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(404).json({ message: 'Editor or Channel not found.' });
         }
 
         // Associate channel with editor
         if (!editor.channels.includes(channel._id)) {
             editor.channels.push(channel._id);
-            await editor.save();
+            await editor.save({ session });
         }
 
         // Associate editor with channel
         if (!channel.editors.includes(editor._id)) {
             channel.editors.push(editor._id);
-            await channel.save();
+            await channel.save({ session });
         }
-        await Invitation.deleteOne({ _id: invitation._id });
+        await Invitation.deleteOne({ _id: invitation._id }).session(session);
+        await session.commitTransaction();
+        session.endSession();
         res.status(200).json({ message: 'Channel confirmed successfully.' });
     } catch (error) {
+        if (session.transaction.state !== 'committed') {
+            await session.abortTransaction();
+        }
         console.error('Error confirming channel:', error);
         res.status(500).json({ message: 'Error confirming channel.' });
+    } finally {
+        session.endSession();
     }
 });
 

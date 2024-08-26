@@ -32,26 +32,40 @@ const AuthProvider = ({ children }) => {
 
   const register = async (token, username, email, password) => {
     try {
-      const response = await axiosInstance.post('/editor/register', { token, username, email, password });
-      return { status: response.status, message: response.data.message };
+      const { status, data } = await axiosInstance.post('/editor/register', { token, username, email, password });
+      return { status, message: data.message };
     } catch (error) {
-      console.error('Editor Registration failed', error);
-      return { status: error.response?.status || 500, message: error.response?.data?.message || 'Editor Registration failed' };
+      console.error('Editor Registration failed:', error);
+
+      const validationErrors = error.response?.data.errors;
+      const message = validationErrors ? validationErrors.map(err => err.message).join(', ') : error.response?.data?.message || 'Editor signup failed';
+
+      return {
+        status: error.response?.status || 500,
+        message
+      };
     }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axiosInstance.post('/editor/login', { email, password });
-      if (response.status === 200) {
-        setUser(response.data.user)
-        return { status: response.status, message: response.data.message };
+      const { status, data } = await axiosInstance.post('/editor/login', { email, password });
+      if (status === 200) {
+        setUser(data.user);
+        return { status, message: data.message };
       } else {
-        return { status: response.data.status, message: 'Editor Login failed' };
+        return { status, message: 'Editor login failed' };
       }
     } catch (error) {
-      console.error('Editor Login failed', error);
-      return { status: error.response?.status || 500, message: error.response?.data?.message || 'Editor Login failed' };
+      console.error('Editor Login failed:', error);
+
+      const validationErrors = error.response?.data.errors;
+      const message = validationErrors ? validationErrors.map(err => err.message).join(', ') : error.response?.data?.message || 'Editor login failed';
+
+      return {
+        status: error.response?.status || 500,
+        message
+      };
     }
   };
 
@@ -59,6 +73,7 @@ const AuthProvider = ({ children }) => {
     try {
       await axiosInstance.post('/auth/logout');
       setUser(null);
+      console.log('user after logout:', user)
       navigate('/home');
     } catch (error) {
       console.error('Error fetching pending videos:', error);

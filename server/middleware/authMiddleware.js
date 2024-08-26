@@ -22,7 +22,6 @@ const authenticateEditor = async (req, res, next) => {
         }
 
         req.user = decoded;
-        console.log('Editor user:', decoded);
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');
@@ -48,7 +47,6 @@ const authenticateYoutuber = async (req, res, next) => {
         }
 
         req.user = decoded;
-        console.log('YouTuber user:', decoded);
         next();
     } catch (err) {
         return res.status(403).send('Invalid token');

@@ -41,8 +41,8 @@ function EditorDashboard() {
         return <Loader />;
     }
 
-    if (!loading && (!user || user.role !== 'Editor')) {
-        return <Navigate to="/login-editor" />;
+    if (!user || user.role !== 'Editor') {
+        return <Navigate to="/editor/login" replace />;
     }
 
     return (
@@ -52,12 +52,12 @@ function EditorDashboard() {
                     <h2 className="text-3xl font-bold mb-2 flex items-center justify-start gap-2 tracking-wider">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        </svg> Hey <span className='font-lowballBold'>{user.userName} !</span>
+                        </svg> Hey <span className='font-lowballBold'>{user.username}</span>
                     </h2>
                 </div>
             </div>
 
-            <div className="bg-img text-white py-4 px-3 rounded-3xl drop-shadow-2xl min-h-[25vh]">
+            <div className="bg-img text-white py-4 px-3 md:p-6 rounded-3xl drop-shadow-2xl min-h-[25vh]">
                 <h2 className="text-2xl font-bold mb-4">🎬 <span className=''>Channels you have access</span></h2>
                 <hr className="border-white border-1 mb-4"></hr>
                 <input
@@ -89,8 +89,8 @@ function EditorDashboard() {
                     </div>
                 ))}
             </div>
-        </section>
-    );
+        </section >
+    )
 }
 
 export default EditorDashboard;

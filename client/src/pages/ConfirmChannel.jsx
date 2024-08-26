@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axiosInstance from '../utils/AxiosInstance';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import BackButton from '../components/BackButton';
 
 const ConfirmChannel = () => {
     const [searchParams] = useSearchParams();
@@ -16,9 +17,9 @@ const ConfirmChannel = () => {
             if (response.status === 200) {
                 setMessage(response.data.message);
                 setStatus('success');
-                setTimeout(() => {
-                    navigate('/editor/dashboard');
-                }, 2500);
+                // setTimeout(() => {
+                //     navigate('/editor/dashboard');
+                // }, 2500);
             } else {
                 setMessage(response.data.message);
                 setStatus('error');
@@ -28,8 +29,8 @@ const ConfirmChannel = () => {
             setStatus('error');
             console.error(error);
         } finally {
-            setMessage('');
-            setStatus('');
+            // setMessage('');
+            // setStatus('');
         }
     };
 
@@ -43,9 +44,10 @@ const ConfirmChannel = () => {
     }, [token, email]);
 
     return (
-        <div className="min-h-[50vh] flex items-center justify-center m-3 mt-6 bg-img text-white rounded-3xl">
-            <div className="container mx-auto my-8 px-4 md:px-0 w-full md:w-2/3 lg:w-1/2">
-                <div className="p-16 flex items-center justify-center flex-col text-center rounded-lg drop-shadow-2xl">
+        <section className="my-8 container mx-auto px-2 md:px-0">
+            <BackButton />
+            <div className="bg-img rounded-3xl text-white py-4 px-2 md:px-6 drop-shadow-2xl mb-8">
+            <div className="p-16 flex items-center justify-center flex-col text-center rounded-lg drop-shadow-2xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center justify-between gap-2">
                         {status === 'success'
                             ? 'Hey Editor, your channel invitation is confirmed! 🎉'
@@ -62,7 +64,7 @@ const ConfirmChannel = () => {
                     </p>}
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

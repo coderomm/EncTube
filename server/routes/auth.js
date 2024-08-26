@@ -21,8 +21,9 @@ const oauth2Client = new OAuth2(
 router.get('/youtuber', (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/youtube', 'openid', 'email', 'profile'],
-  });
+    scope: ['https://www.googleapis.com/auth/youtube',
+      'https://www.googleapis.com/auth/youtube.upload', 'openid', 'email', 'profile'],
+  })
   res.redirect(authUrl);
 });
 
@@ -127,6 +128,9 @@ router.get('/checkAuth', async (req, res) => {
 router.post("/logout", async (req, res) => {
   const youtuberToken = req.cookies.youtuberToken;
   const editorToken = req.cookies.editorToken;
+  if (!youtuberToken && !editorToken) {
+    return res.status(400).json({ message: "No active session found" });
+  }
   try {
     if (youtuberToken) {
       const decodedYoutuber = jwt.verify(youtuberToken, process.env.JWT_SECRET);
@@ -134,12 +138,15 @@ router.post("/logout", async (req, res) => {
       if (!youtuber) {
         return res.status(401).json({ message: 'User no longer exists' });
       }
+      res.set('Cache-Control', 'no-store');
       res.cookie('youtuberToken', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        expires: new Date(0)
+        expires: new Date(0),
+        path: '/'
       });
+      return res.status(200).json({ message: "Channel logged out successfully" });
     }
 
     if (editorToken) {
@@ -148,18 +155,16 @@ router.post("/logout", async (req, res) => {
       if (!editor) {
         return res.status(401).json({ message: 'User no longer exists' });
       }
+      res.set('Cache-Control', 'no-store');
       res.cookie('editorToken', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        expires: new Date(0)
+        expires: new Date(0),
+        path: '/'
       });
+      return res.status(200).json({ message: "Editor logged out successfully" });
     }
-    if (!youtuberToken && !editorToken) {
-      return res.status(400).json({ message: "No active session found" });
-    }
-
-    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",
