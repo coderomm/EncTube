@@ -52,7 +52,11 @@ router.get('/oauth2callback', async (req, res) => {
     }
 
     const channelData = channelResponse.data.items[0];
+    const thumbnails = channelData.snippet.thumbnails;
     const channelUrl = channelData.snippet.customUrl;
+    const defaultLogo = thumbnails.default.url;
+    const mediumLogo = thumbnails.medium.url;
+    const highLogo = thumbnails.high.url;
     const youtubeChannelId = channelData.id;
     const channelName = channelData.snippet.title;
 
@@ -62,6 +66,7 @@ router.get('/oauth2callback', async (req, res) => {
         email,
         channelName,
         channelUrl,
+        channelLogo: highLogo,
         youtubeChannelId,
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,

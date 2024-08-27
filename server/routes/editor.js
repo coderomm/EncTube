@@ -176,6 +176,28 @@ router.get('/channels', authenticateEditor, async (req, res) => {
     }
 });
 
+router.get('/channel/:id', authenticateEditor, async (req, res) => {
+    try {
+        const youtubeChannel = await Youtuber.findById(req.params.id).select('channelName channelUrl channelLogo');
+        if (!youtubeChannel) {
+            return res.status(404).json({ message: 'Youtuber not found' });
+        }
+        res.status(200).json(youtubeChannel);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching youtuber details' });
+    }
+});
+
+router.get('/video/pending', authenticateEditor, async (req, res) => {
+    const { channelId } = req.query;
+    try {
+        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
+        res.status(200).json(pendingVideos);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching pending videos' });
+    }
+});
+
 router.get('/all-editors', authenticateYoutuber, async (req, res) => {
     try {
         let channel = await Channel.findOne({ youtuber: req.user.userId }).populate('editors');
@@ -200,16 +222,6 @@ router.get('/all-editors', authenticateYoutuber, async (req, res) => {
     } catch (error) {
         console.error('Error fetching editors:', error);
         res.status(500).json({ message: 'Error fetching editors' });
-    }
-});
-
-router.get('/video/pending', authenticateEditor, async (req, res) => {
-    const { channelId } = req.query;
-    try {
-        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
-        res.status(200).json(pendingVideos);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching pending videos' });
     }
 });
 

@@ -40,7 +40,7 @@ const AddVideo = () => {
 
         const fetchChannelDetails = async () => {
             try {
-                const response = await axiosInstance.get(`/channel/${channelId}`);
+                const response = await axiosInstance.get(`/editor/channel/${channelId}`);
                 setChannel(response.data);
             } catch (message) {
                 console.error('Error fetching channel details:', message);
@@ -68,7 +68,7 @@ const AddVideo = () => {
                 console.error('Error fetching categories:', error);
             }
         };
-        fetchCategories();
+        // fetchCategories();
         fetchChannelDetails();
         fetchPendingVideo();
     }, [user, loading, channelId, uploading]);
@@ -149,7 +149,7 @@ const AddVideo = () => {
 
     return (
         <section className="my-8 container mx-auto px-2 md:px-0">
-            <BackButton/>
+            <BackButton />
             {channel && (
                 <div className="bg-img rounded-2xl text-white p-4 drop-shadow-2xl mb-4 flex flex-row items-center justify-center md:justify-start">
                     <h2 className="text-2xl font-lowballRegular tracking-widest md:mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -187,15 +187,23 @@ const AddVideo = () => {
                     <form onSubmit={handleUpload}>
                         <h2 className="text-2xl font-lowballRegular tracking-widest mb-1">🎬 Add/Upload New Video</h2>
                         <p className=" mb-12 text-lg tracking-wider text-[#999999]">Upload your video and enter all the details for review, just like in YouTube Studio.</p>
-                        <label className="label mt-4 mb-1 ms-1">Enter the title of the video</label>
-                        <input
-                            type="text"
-                            placeholder="Title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                        />
+                        <div className="relative mt-4 mb-1">
+                            <label htmlFor="title" className="label mt-4 mb-1 ms-1">
+                                Title (required)
+                            </label>
+                            <textarea
+                                id="title"
+                                placeholder="Add a title that describe video"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                required
+                                className="w-full px-3 py-5 border rounded-lg bg-transparent border-gray-500 focus:ring-0 peer text-gray-100 resize-none overflow-hidden md:h-12 pb-5 h-36 text-xl"
+                                maxLength={100}
+                                rows={3}
+                            ></textarea>
+                            <span className="absolute bottom-2 right-4 text-gray-400 text-sm">{title.length}/100</span>
+                        </div>
+
                         <label className="label mt-4 mb-1 ms-1">Enter the description of the video</label>
                         <textarea
                             placeholder="Description"

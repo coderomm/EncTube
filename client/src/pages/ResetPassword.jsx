@@ -41,8 +41,8 @@ const ResetPassword = () => {
     return (
         <div className="min-h-[80vh] flex items-center justify-center my-8 container mx-auto px-4 md:px-0 bg-img text-white rounded-3xl">
             <div className="p-2 md:p-8 rounded-lg drop-shadow-2xl w-full md:w-2/3 lg:w-[35%]">
-            <h2 className="text-2xl font-bold text-center font-lowballBold tracking-wider">Update Password</h2>
-            <p className="text-base font-semibold mb-8 text-center">Reset your password by entering new one below</p>
+                <h2 className="text-2xl font-bold text-center font-lowballBold tracking-wider">Update Password</h2>
+                <p className="text-base font-semibold mb-8 text-center">Reset your password by entering new one below</p>
                 <form onSubmit={handleResetPassword}>
                     <input
                         type="password"

@@ -124,3 +124,11 @@ header {
 .bg-faq-collaps button {
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, border-radius 0.15s ease;
 }
+input:focus {
+  outline: none;
+}
+
+input::placeholder {
+  color: #888;
+  opacity: 0.8;
+}

@@ -1,7 +1,7 @@
 // routes/index.js
 const express = require('express');
 const authRouter = require('./auth');
-const channelRouter = require('./channel');
+const channelRouter = require('./youtuber');
 const editorRouter = require('./editor');
 const invitationRouter = require('./invitation');
 const categoriesRouter = require('./categories');
