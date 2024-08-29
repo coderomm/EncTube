@@ -3,8 +3,8 @@ import Loader from '../components/Loader';
 
 function YouTuberLogin() {
   useEffect(() => {
-    window.location.href = 'http://localhost:5000/api/v1/auth/youtuber';
-    // window.location.href = 'https://enctube.onrender.com/api/v1/auth/youtuber';
+    // window.location.href = 'http://localhost:5000/api/v1/auth/youtuber';
+    window.location.href = 'https://enctube.onrender.com/api/v1/auth/youtuber';
   }, []);
 
   return (

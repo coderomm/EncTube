@@ -88,7 +88,7 @@ router.get('/oauth2callback', async (req, res) => {
     res.cookie('youtuberToken', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      sameSite: 'None',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.redirect(`${process.env.FRONTEND_URL}/youtuber/dashboard`);
@@ -142,7 +142,7 @@ router.post("/logout", async (req, res) => {
       res.cookie('youtuberToken', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
+        sameSite: 'None',
         expires: new Date(0),
         path: '/'
       });
@@ -159,7 +159,7 @@ router.post("/logout", async (req, res) => {
       res.cookie('editorToken', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
+        sameSite: 'None',
         expires: new Date(0),
         path: '/'
       });
