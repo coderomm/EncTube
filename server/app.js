@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const mainRouter = require("./routes/index");
-const videoRouter = require('./routes/video');
 const app = express();
 const PORT = 5000;
 
@@ -32,7 +31,6 @@ app.use(cors({
 }));
 
 app.use('/api/v1', mainRouter);
-app.use('/api/v1/video', videoRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${process.env.BACKEND_BASE_URL}`);

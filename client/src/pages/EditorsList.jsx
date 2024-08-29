@@ -15,7 +15,7 @@ function EditorsList() {
     const fetchEditors = async () => {
         setFetching(true);
         try {
-            const response = await axiosInstance.get('/editor/all-editors');
+            const response = await axiosInstance.get('/youtuber/channel/editors');
             setEditors(response.data);
         } catch (error) {
             console.error('Error fetching channels editors:', error);
@@ -38,9 +38,14 @@ function EditorsList() {
         }
     }, [user, loading]);
 
-    const handleRemoveEditor = async (channelId, editorId) => {
+    const handleRemoveEditor = async (editorId) => {
         try {
-            const response = await axiosInstance.delete(`/channel/${channelId}/editor/${editorId}`);
+            const response = await axiosInstance.delete('/youtuber/channel/editor/remove', {
+                data: {
+                    editorId: editorId
+                }
+            }
+            );
             if (response.status === 200) {
                 setMessage('Editor removed successfully');
                 fetchEditors();
@@ -61,13 +66,24 @@ function EditorsList() {
             {error && <p className="bg-[#ff0000] p-4 py-2 rounded-lg shadow-md mb-4 text-white text-lg">{error}</p>}
             {message && <p className="bg-[#ff0000] p-4 py-2 rounded-lg shadow-md mb-4 text-white text-lg">{message}</p>}
 
-            <div className="bg-img text-white py-4 px-6 rounded-3xl drop-shadow-2xl mb-8">
-                <div className="flex flex-col items-center md:items-start justify-center w-full gap-3">
-                    <h2 className="text-3xl font-bold flex items-center justify-start gap-2 tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        </svg> Hey <span className='font-lowballBold'>{user.channelName} !</span>
-                    </h2>
+            <div className="bg-img rounded-3xl text-white py-4 px-2 md:px-6 drop-shadow-2xl mb-8">
+                <div className="flex flex-col items-center justify-center w-full gap-3">
+                    <div className="font-lowballBold tracking-wider md:mb-2 flex flex-col gap-2">
+                        <h2 className='font-bold text-2xl flex items-center justify-start gap-2'>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            </svg> Hey Welcome
+                        </h2>
+                        <div className="flex">
+                            <div className="rounded-full w-16 h-1w-16 flex justify-center mt-1 mr-3">
+                                <img className='w-full rounded-full' src={user.channelLogo}></img>
+                            </div>
+                            <div className="flex flex-col justify-center">
+                                <h3 className='text-xl font-lowballRegular tracking-wider'>{user.channelName}</h3>
+                                <p className='font-lowballRegular tracking-wider'>{user.channelUrl}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -88,12 +104,12 @@ function EditorsList() {
                                 <>
                                     <div key={editor.editorId} className="flex flex-col gap-3 md:flex-row justify-between mb-4 p-2 rounded-lg">
                                         <li>
-                                            <p className='md:text-xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Editor name : </span>{editor.editorName}</p>
-                                            <p className='md:text-xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Email address : </span>{editor.editorEmail}</p>
-                                            <p className='md:text-xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Videos added to platform : </span>{editor.totalVideos}</p>
-                                            <p className='md:text-xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Videos published to youtube : </span>{editor.approvedVideos}</p>
+                                            <p className='text-2xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Editor name : </span>{editor.editorName}</p>
+                                            <p className='text-2xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Email address : </span>{editor.editorEmail}</p>
+                                            <p className='text-2xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Videos added to platform : </span>{editor.totalVideos}</p>
+                                            <p className='text-2xl tracking-wider'><span className='text-[#999] font-lowballRegular tracking-wider'>- Videos published to youtube : </span>{editor.approvedVideos}</p>
                                         </li>
-                                        <button onClick={() => handleRemoveEditor(user.userId, editor.editorId)} type='button' className='brandBtn flex items-center justify-center gap-3 py-2 px-5 md:h-16 rounded-full'>
+                                        <button onClick={() => handleRemoveEditor(editor.editorId)} type='button' className='brandBtn flex items-center justify-center gap-3 py-2 px-5 md:h-16 rounded-full'>
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                                             </svg> Remove Editor</button>

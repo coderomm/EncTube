@@ -6,9 +6,9 @@ import Loader from '../components/Loader';
 import BackButton from '../components/BackButton';
 
 const AddVideo = () => {
-    const { id: channelId } = useParams();
+    const { id: id } = useParams();
     const { user, loading } = useContext(AuthContext);
-    const [channel, setChannel] = useState(null);
+    const [youtuberChannel, setYoutuberChannel] = useState(null);
     const [videos, setVideos] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -24,8 +24,10 @@ const AddVideo = () => {
     // const [publishAt, setPublishAt] = useState('');
     const [selfDeclaredMadeForKids, setSelfDeclaredMadeForKids] = useState(true);
     const [categories, setCategories] = useState([]);
-    const [file, setFile] = useState(null);
+    const [videoFile, setVideoFile] = useState(null);
+    const [videoFilePreview, setVideoFilePreview] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const [going, setGoing] = useState(true);
     const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -40,8 +42,8 @@ const AddVideo = () => {
 
         const fetchChannelDetails = async () => {
             try {
-                const response = await axiosInstance.get(`/editor/channel/${channelId}`);
-                setChannel(response.data);
+                const response = await axiosInstance.get(`/editor/channel/${id}`);
+                setYoutuberChannel(response.data);
             } catch (message) {
                 console.error('Error fetching channel details:', message);
                 setMessage('Error fetching channel details');
@@ -50,7 +52,7 @@ const AddVideo = () => {
 
         const fetchPendingVideo = async () => {
             try {
-                const response = await axiosInstance.get(`/video/editor/pending?channelId=${channelId}`);
+                const response = await axiosInstance.get(`/video/editor/pending/${id}`);
                 setVideos(response.data);
             } catch (message) {
                 console.error('Error fetching pending videos:', message);
@@ -62,21 +64,21 @@ const AddVideo = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axiosInstance.get('/youtube/categories');
+                const response = await axiosInstance.get('/editor/youtube/video/categories');
                 setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
         };
-        // fetchCategories();
+        fetchCategories();
         fetchChannelDetails();
         fetchPendingVideo();
-    }, [user, loading, channelId, uploading]);
+    }, [user, loading, id, uploading]);
 
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!title || !description || !categoryId || !file) {
-            setMessage('Please fill all required fields and select a file to upload.');
+        if (!title || !description || !categoryId || !videoFile || !thumbnail) {
+            setMessage('Please fill all required fields and select a videoFile to upload.');
             return;
         }
         setUploading(true);
@@ -94,39 +96,49 @@ const AddVideo = () => {
             formData.append('notifySubscribers', notifySubscribers);
             formData.append('embeddable', embeddable);
         }
-        formData.append('file', file);
+        formData.append('file', videoFile);
         formData.append('thumbnail', thumbnail);
-        formData.append('channelId', channelId);
-        formData.append('editorId', user.userId);
+        formData.append('youtuber', id);
+        formData.append('editor', user.userId);
         try {
             const response = await axiosInstance.post('/video/editor/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setVideos([...videos, response.data]);
-            setTitle('');
-            setDescription('');
-            setTags([]);
-            setCategoryId('');
-            setDefaultLanguage('');
-            setPrivacyStatus('private');
-            setNotifySubscribers(true);
-            setEmbeddable(true);
-            setLicense('youtube');
-            setPublicStatsViewable(true);
-            // setPublishAt('');
-            setSelfDeclaredMadeForKids(false);
-            setFile(null);
             setMessage('Video uploaded successfully!');
         } catch (message) {
             console.error('Error uploading video:', message);
             setMessage('Error uploading video');
         } finally {
             setUploading(false);
+            resetForm();
             setTimeout(() => {
                 setMessage('')
             }, 3000)
         }
     };
+
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setTags([]);
+        setCategoryId('');
+        setDefaultLanguage('en');
+        setPrivacyStatus('private');
+        setNotifySubscribers(true);
+        setEmbeddable(true);
+        setLicense('youtube');
+        setPublicStatsViewable(true);
+        setSelfDeclaredMadeForKids(false);
+        setVideoFile(null);
+        setThumbnail(null);
+        setVideoFilePreview(null);
+        setThumbnailPreview(null);
+    };
+
+    if (going) {
+        return <Loader />;
+    }
 
     const handleTagInput = (e) => {
         const value = e.target.value;
@@ -143,23 +155,43 @@ const AddVideo = () => {
         setTags(tags.filter((_, i) => i !== index));
     };
 
-    if (going) {
-        return <Loader />;
-    }
+    const handleThumbnailChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setThumbnail(file);
+            setThumbnailPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setVideoFile(file);
+            setVideoFilePreview(URL.createObjectURL(file));
+        }
+    };
 
     return (
         <section className="my-8 container mx-auto px-2 md:px-0">
             <BackButton />
-            {channel && (
-                <div className="bg-img rounded-2xl text-white p-4 drop-shadow-2xl mb-4 flex flex-row items-center justify-center md:justify-start">
+            {youtuberChannel && (
+                <div className="bg-img rounded-2xl text-white p-4 drop-shadow-2xl mb-4 flex flex-col gap-3">
                     <h2 className="text-2xl font-lowballRegular tracking-widest md:mb-2 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>Channel - <nbsp></nbsp>
+                    </svg>Channel Details -
                     </h2>
-                    <h3 className='text-2xl text-[#999] font-lowballBold tracking-wider'> {channel.youtuber.channelName}</h3>
+                    <div className="flex">
+                        <div className="rounded-full w-16 h-1w-16 flex justify-center mt-1 mr-3">
+                            <img className='w-full rounded-full' src={youtuberChannel.channelLogo}></img>
+                        </div>
+                        <div className="flex flex-col justify-center h-ful">
+                            <h3 className='text-xl font-lowballRegular tracking-wider'>{youtuberChannel.channelName}</h3>
+                            <p className='font-lowballRegular tracking-wider'>{youtuberChannel.channelUrl}</p>
+                        </div>
+                    </div>
+                    {/* <h3 className='text-2xl text-[#999] font-lowballBold tracking-wider'> {youtuberChannel.channelName}</h3> */}
                 </div>
             )}
-            {/* <hr className="border-white border-1 mb-4"></hr> */}
             <div className="mb-4 grid grid-cols-1 gap-4">
                 <div className="bg-img rounded-2xl text-white p-4 drop-shadow-2xl">
                     <h2 className="text-2xl font-lowballRegular tracking-widest mb-1 flex items-center justify-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -197,36 +229,66 @@ const AddVideo = () => {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
-                                className="w-full px-3 py-5 border rounded-lg bg-transparent border-gray-500 focus:ring-0 peer text-gray-100 resize-none overflow-hidden md:h-12 pb-5 h-36 text-xl"
+                                className="w-full px-3 py-5 border rounded-lg bg-transparent border-gray-500 focus:ring-0 peer text-gray-100 resize-none overflow-hidden h-36 md:h-24 lg:h-12 lg:py-0 lg:pt-2 text-xl"
+                                minLength={1}
                                 maxLength={100}
                                 rows={3}
                             ></textarea>
                             <span className="absolute bottom-2 right-4 text-gray-400 text-sm">{title.length}/100</span>
                         </div>
-
-                        <label className="label mt-4 mb-1 ms-1">Enter the description of the video</label>
-                        <textarea
-                            placeholder="Description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                        ></textarea>
-                        <label className="label mt-4 mb-1 ms-1">Upload a thumbnail of this video</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setThumbnail(e.target.files[0])}
-                            required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                        />
-                        <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Choose & upload the video</label>
-                        <input
-                            type="file"
-                            onChange={(e) => setFile(e.target.files[0])}
-                            required
-                            className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
-                        />
+                        <div className="relative mt-4 mb-1">
+                            <label className="label mt-4 mb-1 ms-1">Description</label>
+                            <textarea
+                                placeholder="Write description about video"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                                minLength={1}
+                                maxLength={5000}
+                                className="w-full px-3 py-5 border rounded-lg bg-transparent border-gray-500 focus:ring-0 peer text-gray-100 resize-none h-96 lg:py-4 text-xl"
+                            ></textarea>
+                            <span className="absolute bottom-2 right-4 text-gray-400 text-sm">{description.length}/5000</span>
+                        </div>
+                        <div className="relative mt-4 mb-1">
+                            <label className="label mt-4 mb-1 ms-1">Set a thumbnail</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleThumbnailChange}
+                                required
+                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                            />
+                            {thumbnailPreview && (
+                                <div className="mt-2">
+                                    <img
+                                        src={thumbnailPreview}
+                                        alt="Thumbnail Preview"
+                                        className="w-32 h-18 object-cover border rounded-lg"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="relative mt-1 mb-1">
+                            <label className="label mt-4 mb-1 ms-1" disabled={privacyStatus === 'private'}>Select video</label>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoChange}
+                                required
+                                className="w-full mb-4 px-4 py-2 border rounded-lg bg-transparent"
+                            />
+                            {videoFilePreview && (
+                                <div className="mt-2">
+                                    <video
+                                        src={videoFilePreview}
+                                        controls
+                                        className="w-full max-w-md rounded-lg border"
+                                    >
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            )}
+                        </div>
                         <p className="mt-4 mb-1 ms-1 text-2xl font-lowballRegular tracking-wider">Tags & Metadata -</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-3">
                             <div className="flex flex-col items-start">

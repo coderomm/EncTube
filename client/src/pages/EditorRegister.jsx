@@ -38,7 +38,6 @@ function EditorRegister() {
         }
 
         setLoading(true);
-
         const response = await register(token, username, email, password);
         setLoading(false);
 

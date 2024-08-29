@@ -5,7 +5,6 @@ const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 const Youtuber = require('../models/Youtuber');
 const jwt = require('jsonwebtoken');
-const Channel = require('../models/Channel');
 const Editor = require('../models/Editor');
 
 const OAUTH2_CLIENT_ID = process.env.CLIENT_ID;
@@ -70,7 +69,7 @@ router.get('/oauth2callback', async (req, res) => {
         youtubeChannelId,
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
-        role: 'YouTuber'
+        role: 'YouTuber',
       });
     } else {
       youtuber.accessToken = tokens.access_token;
@@ -78,17 +77,13 @@ router.get('/oauth2callback', async (req, res) => {
     }
     await youtuber.save();
 
-    let channel = await Channel.findOne({ youtubeChannelId });
-    if (!channel) {
-      channel = new Channel({
-        youtubeChannelId,
-        youtuber: youtuber._id,
-        editors: [],
-      });
-      await channel.save();
-    }
-
-    const jwtToken = jwt.sign({ userId: youtuber._id, role: youtuber.role, channelName: youtuber.channelName, channelUrl: youtuber.channelUrl }, process.env.JWT_SECRET);
+    const jwtToken = jwt.sign({
+      userId: youtuber._id,
+      role: youtuber.role,
+      channelName: youtuber.channelName,
+      channelUrl: youtuber.channelUrl,
+      channelLogo: youtuber.channelLogo
+    }, process.env.JWT_SECRET);
 
     res.cookie('youtuberToken', jwtToken, {
       httpOnly: true,
@@ -151,7 +146,7 @@ router.post("/logout", async (req, res) => {
         expires: new Date(0),
         path: '/'
       });
-      return res.status(200).json({ message: "Channel logged out successfully" });
+      return res.status(200).json({ message: "Youtube channel logged out successfully" });
     }
 
     if (editorToken) {

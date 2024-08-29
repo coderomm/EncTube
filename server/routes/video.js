@@ -8,7 +8,6 @@ const OAuth2 = google.auth.OAuth2;
 const axios = require('axios');
 const mongoose = require('mongoose');
 const Video = require('../models/Video');
-const Channel = require('../models/Channel');
 const Youtuber = require('../models/Youtuber');
 const Editor = require('../models/Editor');
 const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
@@ -24,16 +23,33 @@ const OAUTH2_REDIRECT_URL = process.env.REDIRECT_URL;
 const oAuth2Client = new OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URL);
 
 const uploadSchema = z.object({
-  title: z.string({ required_error: 'Title is required' }).min(1),
-  description: z.string({ required_error: 'Description is required' }).min(1),
-  channelId: z.string({ required_error: 'Channel ID is required' }),
-  tags: z.array(z.string({ required_error: 'Each tag must be a string' })).nonempty({ message: 'At least one tag is required' }),
+  title: z.string({ required_error: 'Title is required' })
+    .min(1, { message: 'Title must be at least 1 character long' })
+    .max(100, { message: 'Title cannot exceed 100 characters' }),
+  description: z.string({ required_error: 'Description is required' })
+    .min(1, { message: 'Description must be at least 1 character long' })
+    .max(5000, { message: 'Description cannot exceed 5000 characters' }),
+  youtuber: z.string({ required_error: 'Youtuber ID is required' }),
+  tags: z.array(z.string()).optional(),
   categoryId: z.string({ required_error: 'Category ID is required' }),
   defaultLanguage: z.string({ required_error: 'Default Language is required' }),
   privacyStatus: z.enum(['private', 'public', 'unlisted']),
   license: z.enum(['youtube', 'creativeCommon']).optional(),
   publishAt: z.string().optional(),
   selfDeclaredMadeForKids: z.boolean().optional(),
+});
+
+const updateVideoSchema = z.object({
+  title: z.string()
+    .min(1, { message: 'Title must be at least 1 character long' })
+    .max(100, { message: 'Title cannot exceed 100 characters' })
+    .optional(),
+  description: z.string()
+    .min(1, { message: 'Description must be at least 1 character long' })
+    .max(5000, { message: 'Description cannot exceed 5000 characters' })
+    .optional(),
+  tags: z.array(z.string()).optional(),
+  privacyStatus: z.enum(['private', 'public', 'unlisted']).optional(),
 });
 
 router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' }, { name: 'thumbnail' }]), async (req, res) => {
@@ -51,20 +67,16 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     }
 
     const {
-      title, description, channelId, tags, categoryId, defaultLanguage,
-      privacyStatus, notifySubscribers, embeddable, license, publicStatsViewable,
-      publishAt, selfDeclaredMadeForKids
+      title, description, youtuber, tags, categoryId, defaultLanguage,
+      privacyStatus, notifySubscribers, embeddable, license, publicStatsViewable, selfDeclaredMadeForKids
     } = req.body;
 
     if (!req.files['file'] || !req.files['thumbnail']) {
       throw new Error('Video and thumbnail files are required');
     }
 
-    const channel = await Channel.findById(channelId).session(session);
-    if (!channel) throw new Error('Channel not found');
-
-    const youtuber = await Youtuber.findById(channel.youtuber).session(session);
-    if (!youtuber) throw new Error('YouTuber not found');
+    const youtuberChannel = await Youtuber.findById(youtuber).session(session);
+    if (!youtuberChannel) throw new Error('YouTuber not found');
 
     const editor = await Editor.findById(req.user.userId).session(session);
     if (!editor) throw new Error('Editor not found');
@@ -113,14 +125,12 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
       embeddable,
       license,
       publicStatsViewable,
-      publishAt,
       selfDeclaredMadeForKids,
       videoFilePath: videoUrl,
       thumbnailFilePath: thumbnailUrl,
       youtubeVideoId: '',
-      youtuberId: channel.youtuber,
-      editorId: req.user.userId,
-      channelId,
+      youtuber: youtuber,
+      editor: req.user.userId,
       status: 'Pending',
     });
 
@@ -136,7 +146,7 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
     });
     const dashboardApprovalLink = `${process.env.FRONTEND_URL}/youtuber/video/${video._id}`;
     const oneClickApprovalLink = `${process.env.FRONTEND_URL}/youtuber/approve/${video._id}`;
-    await sendVideoAddedEmail(youtuber.email, youtuber.channelName, 9, youtuber.channelName, youtuber.channelUrl, editor.username, editor.email,
+    await sendVideoAddedEmail(youtuberChannel.email, youtuberChannel.channelName, 9, youtuberChannel.channelName, youtuberChannel.channelUrl, editor.username, editor.email,
       title, privacyStatus, thumbnailSignedUrl, videoSignedUrl, dashboardApprovalLink, oneClickApprovalLink);
 
     await session.commitTransaction();
@@ -152,18 +162,16 @@ router.post('/editor/upload', authenticateEditor, upload.fields([{ name: 'file' 
   }
 });
 
-router.get('/editor/pending', authenticateEditor, async (req, res) => {
-  const userId = req.user.userId;
-  const userRole = req.user.role;
+router.get('/editor/pending/:id', authenticateEditor, async (req, res) => {
   try {
     let pendingVideos;
 
-    if (userRole === 'Editor') {
-      const { channelId } = req.query;
-      if (!channelId) {
-        return res.status(400).json({ message: 'Channel ID is required' });
+    if (req.user.role === 'Editor') {
+      const youtuberChannelId = req.params.id;
+      if (!youtuberChannelId) {
+        return res.status(400).json({ message: 'Youtuber channel Id is required' });
       }
-      pendingVideos = await Video.find({ channelId: channelId, editorId: userId, status: 'Pending' });
+      pendingVideos = await Video.find({ channel: youtuberChannelId, editor: req.user.userId, status: 'Pending' });
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }
@@ -176,19 +184,15 @@ router.get('/editor/pending', authenticateEditor, async (req, res) => {
 });
 
 router.get('/youtuber/pending', authenticateYoutuber, async (req, res) => {
-  console.log('fetch pending vdo, req.user : ', req.user)
-  const userId = req.user.userId;
-  const userRole = req.user.role;
   try {
     let pendingVideos;
 
-    if (userRole === 'YouTuber') {
-      const channel = await Channel.findOne({ youtuber: userId });
-      if (!channel) {
-        return res.status(404).json({ message: 'Channel not found' });
+    if (req.user.role === 'YouTuber') {
+      const youtuberChannel = await Youtuber.findById(req.user.userId);
+      if (!youtuberChannel) {
+        return res.status(404).json({ message: 'Youtuber not found' });
       }
-      pendingVideos = await Video.find({ channelId: channel._id, status: 'Pending' })
-        .populate('editorId', 'username email');
+      pendingVideos = await Video.find({ youtuber: youtuberChannel._id, status: 'Pending' }).populate('editor', 'username email');
     } else {
       return res.status(403).json({ message: 'Access denied, invalid role' });
     }
@@ -237,6 +241,11 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
+    const validationResult = updateVideoSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ errors: validationResult.error.errors });
+    }
+
     const video = await Video.findById(req.params.id).session(session);
     if (!video) {
       await session.abortTransaction();
@@ -256,7 +265,7 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
 
     video.status = action;
     if (video.status === 'Approved') {
-      const youtuber = await Youtuber.findById(video.youtuberId).session(session);
+      const youtuber = await Youtuber.findById(video.youtuber).session(session);
       if (!youtuber) {
         await session.abortTransaction();
         return res.status(404).send('Youtuber not found');

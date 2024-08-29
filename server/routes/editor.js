@@ -1,7 +1,9 @@
 // routes/editor.js
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const { google } = require('googleapis');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
@@ -9,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const zod = require('zod');
 const Editor = require('../models/Editor');
 const Invitation = require('../models/Invitation');
-const Channel = require('../models/Channel');
+const Youtuber = require('../models/Youtuber');
 const { authenticateEditor, authenticateYoutuber } = require('../middleware/authMiddleware');
 const { sendResetPasswordEmail } = require('../utils/sendResetPasswordEmail');
 
@@ -51,15 +53,15 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const channel = await Channel.findOne({ youtuber: invitation.youtuberId });
-        if (!channel) {
+        const youtubeChannel = await Youtuber.findById(invitation.youtuber);
+        if (!youtubeChannel) {
             await session.abortTransaction();
-            return res.status(404).send('Channel not found.');
+            return res.status(404).send('Youtube channel not found.');
         }
 
         let editor = await Editor.findOne({ email: invitation.editorEmail });
         if (editor) {
-            editor.channels = [...new Set([...editor.channels, channel._id])];
+            editor.channels = [...new Set([...editor.channels, youtubeChannel._id])];
         } else {
             const hashedPassword = await bcrypt.hash(password, 10);
             editor = new Editor({
@@ -67,12 +69,12 @@ router.post('/register', async (req, res) => {
                 email: invitation.editorEmail,
                 password: hashedPassword,
                 role: 'Editor',
-                channels: [channel._id]
+                youtubers: [youtubeChannel._id]
             });
         }
         await editor.save({ session });
-        channel.editors.push(editor._id);
-        await channel.save({ session });
+        youtubeChannel.editors.push(editor._id);
+        await youtubeChannel.save({ session });
         await Invitation.deleteOne({ _id: invitation._id }, { session });
 
         await session.commitTransaction();
@@ -169,8 +171,8 @@ router.post('/reset-password', async (req, res) => {
 
 router.get('/channels', authenticateEditor, async (req, res) => {
     try {
-        const channels = await Channel.find({ editors: req.user.userId }).populate('youtuber', 'channelName channelUrl');
-        res.status(200).json(channels);
+        const youtubeChannels = await Youtuber.find({ editors: req.user.userId }).select('channelName channelUrl channelLogo');;
+        res.status(200).json(youtubeChannels);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching channels' });
     }
@@ -188,40 +190,38 @@ router.get('/channel/:id', authenticateEditor, async (req, res) => {
     }
 });
 
-router.get('/video/pending', authenticateEditor, async (req, res) => {
-    const { channelId } = req.query;
+async function fetchAndStoreCategories() {
     try {
-        const pendingVideos = await Video.find({ channel: channelId, status: 'Pending' });
-        res.status(200).json(pendingVideos);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching pending videos' });
-    }
-});
+        const youtube = google.youtube({
+            version: 'v3',
+            auth: process.env.YOUTUBE_API_KEY
+        });
+        const response = await youtube.videoCategories.list({
+            part: 'snippet',
+            regionCode: 'IN'
+        });
 
-router.get('/all-editors', authenticateYoutuber, async (req, res) => {
-    try {
-        let channel = await Channel.findOne({ youtuber: req.user.userId }).populate('editors');
-        if (!channel) {
-            return res.status(404).json({ message: 'Channel not found' });
-        }
-
-        const editorStats = await Promise.all(channel.editors.map(async (editor) => {
-            const totalVideos = await Video.countDocuments({ editorId: editor._id, channelId: channel._id });
-            const approvedVideos = await Video.countDocuments({ editorId: editor._id, channelId: channel._id, status: 'Approved' });
-
-            return {
-                editorId: editor._id,
-                editorName: editor.username,
-                editorEmail: editor.email,
-                totalVideos,
-                approvedVideos
-            };
+        const categories = response.data.items.map(item => ({
+            id: item.id,
+            title: item.snippet.title
         }));
 
-        res.status(200).json(editorStats);
+        const filePath = path.join(__dirname, '../utils/videoCategories.json');
+
+        fs.writeFileSync(filePath, JSON.stringify(categories, null, 2));
+        return categories;
     } catch (error) {
-        console.error('Error fetching editors:', error);
-        res.status(500).json({ message: 'Error fetching editors' });
+        console.error('Error fetching categories:', error);
+        throw error;
+    }
+}
+
+router.get('/youtube/video/categories', async (req, res) => {
+    try {
+        const categories = await fetchAndStoreCategories();
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching categories' });
     }
 });
 

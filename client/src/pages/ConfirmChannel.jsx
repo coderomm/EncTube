@@ -13,13 +13,13 @@ const ConfirmChannel = () => {
 
     const handleConfirm = async () => {
         try {
-            const response = await axiosInstance.post('/invitation/confirmChannel', { token, email });
+            const response = await axiosInstance.post('/channel/editor/confirm', { token, email });
             if (response.status === 200) {
                 setMessage(response.data.message);
                 setStatus('success');
-                // setTimeout(() => {
-                //     navigate('/editor/dashboard');
-                // }, 2500);
+                setTimeout(() => {
+                    navigate('/editor/dashboard');
+                }, 2500);
             } else {
                 setMessage(response.data.message);
                 setStatus('error');
@@ -29,8 +29,8 @@ const ConfirmChannel = () => {
             setStatus('error');
             console.error(error);
         } finally {
-            // setMessage('');
-            // setStatus('');
+            setMessage('');
+            setStatus('');
         }
     };
 
@@ -47,7 +47,7 @@ const ConfirmChannel = () => {
         <section className="my-8 container mx-auto px-2 md:px-0">
             <BackButton />
             <div className="bg-img rounded-3xl text-white py-4 px-2 md:px-6 drop-shadow-2xl mb-8">
-            <div className="p-16 flex items-center justify-center flex-col text-center rounded-lg drop-shadow-2xl">
+                <div className="p-16 flex items-center justify-center flex-col text-center rounded-lg drop-shadow-2xl">
                     <h2 className="text-2xl font-bold mb-4 flex items-center justify-between gap-2">
                         {status === 'success'
                             ? 'Hey Editor, your channel invitation is confirmed! 🎉'
