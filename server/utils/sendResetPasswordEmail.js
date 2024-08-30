@@ -24,7 +24,7 @@ async function sendResetPasswordEmail(toEmail, toName, templateId, resetPassword
 
   try {
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('Invitation to editor sent successfully. Returned data:', data);
+    console.log('Reset password link to editor sent successfully. Returned data:', data);
   } catch (error) {
     console.error('Error occurred:', error);
   }

@@ -310,7 +310,6 @@ router.put('/youtuber/approve/:id', authenticateYoutuber, async (req, res) => {
         method: 'GET',
         responseType: 'stream',
       });
-      console.log('video data going to upload to youtube is : ', video)
       try {
         const uploadResponse = await youtube.videos.insert({
           part: 'snippet,status',

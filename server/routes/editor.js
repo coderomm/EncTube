@@ -112,9 +112,10 @@ router.post('/login', async (req, res) => {
                 sameSite: 'None',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
+            const { _id, username, email, role, youtubers } = editor;
             res.status(200).json({
                 message: 'Editor Login Successful',
-                user: editor
+                user: { _id, username, email, role, youtubers }
             });
         } else {
             res.status(400).json({ message: 'Invalid credentials' });

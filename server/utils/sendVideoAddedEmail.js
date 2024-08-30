@@ -34,7 +34,7 @@ async function sendVideoAddedEmail(toEmail, toName, templateId, channelName, cha
 
   try {
     const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('Invitation to editor sent successfully. Returned data:', data);
+    console.log('Video added by editor notification sent successfully to youtuber. Returned data:', data);
   } catch (error) {
     console.error('Error occurred:', error);
   }

@@ -114,7 +114,7 @@ const AddVideo = () => {
             resetForm();
             setTimeout(() => {
                 setMessage('')
-            }, 3000)
+            }, 5000)
         }
     };
 

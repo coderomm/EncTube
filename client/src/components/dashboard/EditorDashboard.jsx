@@ -23,6 +23,7 @@ function EditorDashboard() {
 
     useEffect(() => {
         if (!loading && user && user.role === 'Editor') {
+            console.log('editor user after login on dashboard: ', user)
             fetchChannels();
         }
     }, [loading, user, fetchChannels]);
