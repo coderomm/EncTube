@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useContext, Suspense, lazy } from 'react';
+import { useContext, Suspense, lazy, useEffect } from 'react';
 import { RecoilRoot } from 'recoil';
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import ProtectedRouteEditor from './components/ProtectedRouteEditor';
@@ -8,6 +8,7 @@ import Loader from './components/Loader';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import pingServer from './utils/pingServer';
 
 const Home = lazy(() => import('./pages/Home'));
 const YouTuberLogin = lazy(() => import('./pages/YouTuberLogin'));
@@ -28,6 +29,10 @@ const EditorsList = lazy(() => import('./pages/EditorsList'));
 
 function App() {
   console.log(`${import.meta.env.VITE_APP_BACKEND_URL}`)
+  useEffect(() => {
+    const interval = setInterval(pingServer, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <RecoilRoot>
       <Router>

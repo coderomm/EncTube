@@ -5,6 +5,7 @@ const youtuberRouter = require('./youtuber');
 const editorRouter = require('./editor');
 const contactRouter = require('./contact');
 const videoRouter = require('./video');
+const pingRouter = require('./ping');
 
 const router = express.Router();
 
@@ -13,5 +14,6 @@ router.use('/youtuber', youtuberRouter);
 router.use('/editor', editorRouter);
 router.use('/contact', contactRouter);
 router.use('/video', videoRouter);
+router.use('/ping', pingRouter);
 
 module.exports = router;
