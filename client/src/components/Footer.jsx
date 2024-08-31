@@ -7,7 +7,6 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row gap-1 md:gap-16 justify-evenly items-center text-center md:text-left md:items-start">
                 <div className="flex flex-col items-center md:items-start gap-3">
                     <div className="flex items-center gap-2 sm:gap-4 sm:flex-grow">
-                        {/* <a href="/" className="font-lowballBold tracking-wider text-3xl drop-shadow-2xl text-white cursor-pointer">{import.meta.env.VITE_APP_NAME}</a> */}
                         <a href="/" className="font-lowballBold tracking-wider text-3xl drop-shadow-2xl text-white cursor-pointer"><img className="w-40" src={YouLayerPngSvg} alt="" /></a>
                     </div>
                     <p className="text-lg tracking-wider text-[#999999]">Connect with me!</p>
@@ -41,7 +40,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="flex flex-col justify-start md:justify-between py-6 mt-6 md:mt-0 border-t border-[#1e1d1d] gap-3">
-                    <p className="text-xl font-semibold tracking-wider text-white">© {import.meta.env.VITE_APP_NAME} 2024, Designed <a className="underline" href="https://x.com/1omsharma">CoderOm</a></p>
+                    <p className="text-xl font-semibold tracking-wider text-white">© YouLayer 2024, Designed <a className="underline" href="https://x.com/1omsharma">CoderOm</a></p>
                     <a href="/#" className="text-lg tracking-wider text-[#999999]">Privacy Policy</a>
                 </div>
             </div>

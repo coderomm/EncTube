@@ -38,7 +38,6 @@ const Sidebar = () => {
             <div className={`relative mr-auto transition-transform duration-300 ease-in-out flex flex-col max-w-[285px] px-2 py-4 h-[100vh] gap-4 bg-custom-gradient justify-between ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`} ref={modalRef}>
                 <div className="w-full flex flex-col gap-6 items-center">
                     <div className="flex items-center w-fit mx-auto">
-                        {/* <a href="/" className="font-lowballBold tracking-wider text-3xl drop-shadow-2xl text-white cursor-pointer">{import.meta.env.VITE_APP_NAME}</a> */}
                         <a href="/" className="font-lowballBold tracking-wider text-3xl drop-shadow-2xl text-white cursor-pointer"><img className="w-40" src={YouLayerPngSvg} alt="" /></a>
                     </div>
                     <Menu />
