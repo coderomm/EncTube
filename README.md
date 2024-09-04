@@ -25,4 +25,4 @@ Built with React, Node.js, Express, MongoDB, and Tailwind CSS.
 One significant challenge encountered during development was the YouTube Data API quota limitation. The API currently allows for only 5-6 video uploads per day due to its 10,000 units daily limit. This constraint affects the scalability of the platform for larger use cases.
 
 ### Moving Forward
-Due to this limitation, I won’t be focusing heavily on further development of this project for now. However, if a solution to this scalability issue is found, I’m excited to revisit and expand upon it. Meanwhile, I’m eager to continue my learning journey in the [100xDevs](https://twitter.com/100xDevs) cohort, where I’ll be diving deeper into SQL and Postgres DB in Week 10.
+Due to this quota limitation, I won’t be focusing heavily on further development of this project for now. However, if a solution to this scalability issue is found, I’m excited to revisit and expand upon it. Meanwhile, I’m eager to continue my learning journey in the [100xDevs](https://twitter.com/100xDevs) cohort, where I’ll be diving deeper into SQL and Postgres DB in Week 10.
