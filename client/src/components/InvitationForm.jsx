@@ -5,6 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Loader from './Loader';
 import BackButton from './BackButton';
+import { toast } from 'sonner';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,7 +16,6 @@ const invitationSchema = z.object({
 const InvitationForm = () => {
     const { user, loading } = useContext(AuthContext);
     const [editorEmail, setEditorEmail] = useState('');
-    const [message, setMessage] = useState('');
     const [loading2, setLoading2] = useState(false);
     const [emailError, setEmailError] = useState('Empty email');
     const [correctEMail, setCorrectEMail] = useState(false);
@@ -35,22 +35,20 @@ const InvitationForm = () => {
         const validationResult = invitationSchema.safeParse({ editorEmail });
 
         if (!validationResult.success) {
-            setMessage('Please enter a valid email address');
+            toast.warning('Please enter a valid email address');
             return;
         }
 
         try {
             setLoading2(true);
             const response = await axiosInstance.post('/youtuber/channel/editor/add', { editorEmail: editorEmail.trim() });
-            console.log('send email invite res:', response)
-            setMessage(response.data);
+            toast.success(response.data);
         } catch (error) {
-            setMessage('Failed to send invitation.');
+            toast.error('Failed to send invitation.');
             console.error(error);
         } finally {
             setLoading2(false);
             setEditorEmail('');
-            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -111,14 +109,12 @@ const InvitationForm = () => {
                             required
                             className="max-w-[500px] w-full px-4 py-2 mx-auto border rounded-lg bg-transparent text-lg"
                         />
-                        {/* {emailError && <p className="text-white">{emailError}</p>} */}
                         <button type="submit" className={`brandBtn font-bold drop-shadow-2xl text-white max-w-[500px] w-full mx-auto py-2 mt-6 rounded-lg flex items-center justify-center gap-2 ${loading2 || !correctEMail ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={loading2 || !correctEMail}>
                             {!correctEMail ? emailError : loading2 ? 'Sending ...' : 'Send Invitation'} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                             </svg>
                         </button>
                     </form>
-                    {message && <p className='w-full text-center mt-1 text-white'>{message}</p>}
                 </div>
             </div>
         </section>

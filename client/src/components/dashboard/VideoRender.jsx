@@ -16,11 +16,11 @@ const VideoRender = () => {
             </div>
             <div className="w-100 px-3 flex-grow w-full mt-10">
                 <div className="p-[48px 30px 40px] rounded-[30px] bgblur flex items-center justify-center">
-                    <div className="w-[310px] h-[180px] rounded-xl shadow-[0px_5px_50px_#a90dd040] text-white items-center justify-center flex">Video Coming Soon</div>
-                    {/* <video autoPlay playsInline loop preload='auto' className='max-h-full max-w-full rounded-xl shadow-[0px_5px_50px_#a90dd040]'>
-                        <source src='' type="video/mp4" />
-                        Video Coming Soon...
-                    </video> */}
+                    <div className="rounded-xl shadow-[0px_5px_50px_#a90dd040] text-white items-center justify-center flex">                    
+                    <iframe width="560" height="315" className="rounded-sm" 
+                    src="https://www.youtube.com/embed/osaflxWaSbI?si=BYFx0Erom7xR3GT2&autoplay=1&mute=1" title="YouTube video player" frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
                 </div>
             </div>
         </div>

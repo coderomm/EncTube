@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import pingServer from './utils/pingServer';
+import { Toaster } from 'sonner'
 
 const Home = lazy(() => import('./pages/Home'));
 const YouTuberLogin = lazy(() => import('./pages/YouTuberLogin'));
@@ -36,6 +37,7 @@ function App() {
   return (
     <RecoilRoot>
       <Router>
+        <Toaster />
         <AuthProvider>
           <MainContent />
         </AuthProvider>

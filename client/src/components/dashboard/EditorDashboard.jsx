@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
 import { Navigate, useNavigate } from 'react-router-dom';
 import Loader from '../Loader';
+import { toast } from 'sonner';
 
 function EditorDashboard() {
     const { user, loading } = useContext(AuthContext);
@@ -17,6 +18,7 @@ function EditorDashboard() {
             setYoutubeChannels(response.data);
         } catch (error) {
             console.error('Error fetching youtube channels:', error);
+            toast.error('Error fetching youtube channels');
             setError('Error fetching youtube channels');
         }
     }, []);

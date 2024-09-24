@@ -19,6 +19,7 @@
     "react-router-dom": "^6.25.1",
     "react-transition-group": "^4.4.5",
     "recoil": "^0.7.7",
+    "sonner": "^1.5.0",
     "use-react-countries": "^2.0.1",
     "zod": "^3.23.8"
   },

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/AxiosInstance';
+import { toast } from 'sonner';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -14,27 +14,26 @@ const ResetPassword = () => {
     const handleResetPassword = async (e) => {
         e.preventDefault();
         if (password.length < 6 || confirmPassword.length < 6) {
-            setMessage('Passwords must be of at list 6 characters.');
+            toast.warning('Passwords must be of at list 6 characters.');
             return;
         }
         if (password !== confirmPassword) {
-            setMessage('Passwords do not match');
+            toast.warning('Passwords do not match');
             return;
         }
         setLoading(true);
         try {
             const response = await axiosInstance.post('/editor/reset-password', { token, password });
             if (response.status === 200) {
-                setMessage('Password reset successful!');
+                toast.success('Password reset successful!');
                 navigate('/editor/login');
             } else {
-                setMessage('Error in resetting password');
+                toast.error('Error in resetting password');
             }
         } catch (error) {
-            setMessage('Error in resetting password');
+            toast.error('Error in resetting password');
         } finally {
             setLoading(false);
-            setTimeout(() => setMessage(''), 1500)
         }
     };
 
@@ -65,7 +64,6 @@ const ResetPassword = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
                     </button>
-                    {message && <p className=" my-2 text-center">{message}</p>}
                 </form>
             </div>
         </div>

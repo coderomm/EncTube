@@ -4,6 +4,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Loader from '../components/Loader';
 import BackButton from '../components/BackButton';
+import { toast } from 'sonner';
 
 const AddVideo = () => {
     const { id: id } = useParams();
@@ -29,7 +30,6 @@ const AddVideo = () => {
     const [thumbnail, setThumbnail] = useState(null);
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const [going, setGoing] = useState(true);
-    const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const AddVideo = () => {
                 setYoutuberChannel(response.data);
             } catch (message) {
                 console.error('Error fetching channel details:', message);
-                setMessage('Error fetching channel details');
+                toast.error('Error fetching channel details');
             }
         };
 
@@ -56,7 +56,7 @@ const AddVideo = () => {
                 setVideos(response.data);
             } catch (message) {
                 console.error('Error fetching pending videos:', message);
-                setMessage('Error fetching pending videos');
+                toast.error('Error fetching pending videos');
             } finally {
                 setGoing(false);
             }
@@ -68,6 +68,7 @@ const AddVideo = () => {
                 setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
+                toast.error('Error fetching categories:', error);
             }
         };
         fetchCategories();
@@ -78,7 +79,7 @@ const AddVideo = () => {
     const handleUpload = async (e) => {
         e.preventDefault();
         if (!title || !description || !categoryId || !videoFile || !thumbnail) {
-            setMessage('Please fill all required fields and select a videoFile to upload.');
+            toast.warning('Please fill all required fields and select a videoFile to upload.');
             return;
         }
         setUploading(true);
@@ -105,16 +106,13 @@ const AddVideo = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setVideos([...videos, response.data]);
-            setMessage('Video uploaded successfully!');
+            toast.success('Video uploaded successfully!');
         } catch (message) {
             console.error('Error uploading video:', message);
-            setMessage('Error uploading video');
+            toast.error('Error uploading video');
         } finally {
             setUploading(false);
             resetForm();
-            setTimeout(() => {
-                setMessage('')
-            }, 5000)
         }
     };
 
@@ -430,7 +428,6 @@ const AddVideo = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                             </svg>
                         </button>
-                        {message && <p className="text-white shadow-md my-4 text-lg text-center">{message}</p>}
                     </form>
                 </div>
             </div >

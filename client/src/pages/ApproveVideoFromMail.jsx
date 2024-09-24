@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/AxiosInstance';
 import Loader from '../components/Loader';
+import { toast } from 'sonner';
 
 const ApproveVideoFromMail = () => {
     const { id } = useParams();
     const [status, setStatus] = useState('');
-    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,15 +16,15 @@ const ApproveVideoFromMail = () => {
                 console.log('Response:', response); // Log the full response
                 if (response.status === 200) {
                     setStatus('success');
-                    setMessage('Video approved and published successfully! 🎉');
+                    toast.success('Video approved and published successfully! 🎉');
                 } else {
                     setStatus('error');
-                    setMessage('Failed to approve video.');
+                    toast.error('Failed to approve video.');
                 }
             } catch (error) {
                 console.error('Error during video approval:', error); // Log the error
                 setStatus('error');
-                setMessage('An error occurred while approving the video.');
+                toast.error('An error occurred while approving the video.');
             }
         };
 
@@ -41,7 +41,6 @@ const ApproveVideoFromMail = () => {
                 <h2 className="text-3xl md:text-4xl mb-8 text-center tracking-wider font-lowballRegular text-white">🎬 Video Approval</h2>
                 {status === 'success' ? (
                     <div className='flex items-center flex-col'>
-                        {message && <p className="bg-[#ff0000] text-white p-2 py-0 rounded-lg shadow-md my-4 text-lg text-center">{message}</p>}
                         <button onClick={handleRedirect} className="brandBtn mt-6 px-4 py-2 rounded flex items-center justify-between gap-3">
                             Go to Dashboard <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -50,7 +49,6 @@ const ApproveVideoFromMail = () => {
                     </div>
                 ) : status === 'error' ? (
                     <div className='flex items-center flex-col'>
-                        {message && <p className="bg-[#ff0000] text-white p-2 py-0 rounded-lg shadow-md my-4 text-lg text-center">{message}</p>}
                         <button onClick={handleRedirect} className="brandBtn mt-6 px-4 py-2 rounded flex items-center justify-between gap-3">
                             Go to Dashboard <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

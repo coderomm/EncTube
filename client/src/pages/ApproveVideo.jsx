@@ -4,6 +4,7 @@ import { useParams, Navigate, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Loader from '../components/Loader';
 import BackButton from '../components/BackButton';
+import { toast } from 'sonner';
 
 const ApproveVideo = () => {
     const { id: id } = useParams();
@@ -14,7 +15,7 @@ const ApproveVideo = () => {
     const [tags, setTags] = useState([]);
     const [currentTag, setCurrentTag] = useState('');
     const [privacyStatus, setPrivacyStatus] = useState('');
-    const [message, setMessage] = useState('');
+    // const [message, setMessage] = useState('');
     const [uploading, setUploading] = useState(false);
     const [rejecting, setRejecting] = useState(false);
     const [fetching, setFetching] = useState(true);
@@ -39,13 +40,12 @@ const ApproveVideo = () => {
                     setTags(response.data.tags);
                     setPrivacyStatus(response.data.privacyStatus);
                 } else {
-                    setMessage('Error fetching pending video');
+                    toast.error('Error fetching pending video');
                 }
             } catch (message) {
                 console.error('Error fetching pending video:', message);
-                setMessage('Error fetching pending video');
+                toast.error('Error fetching pending video');
             } finally {
-                setTimeout(() => setMessage(''), 3000)
                 setFetching(false)
             }
         };
@@ -66,14 +66,14 @@ const ApproveVideo = () => {
                 privacyStatus,
             });
             if (response.status === 200) {
-                setMessage('Video uploaded successfully');
+                toast.success('Video uploaded successfully');
                 setTimeout(() => {
                     navigate("/youtuber/dashboard");
                 }, 3500);
             }
         } catch (error) {
             console.error('Error uploading video:', error);
-            setMessage('Error uploading video');
+            toast.error('Error uploading video');
         } finally {
             setUploading(false);
             setTimeout(() => {
@@ -88,10 +88,10 @@ const ApproveVideo = () => {
             const response = await axiosInstance.put(`/video/youtuber/approve/${id}`, { status: 'Rejected' });
             console.log('vdo reject res:', response)
             setVideo('');
-            setMessage('Video removed successfully');
+            toast.success('Video removed successfully');
         } catch (error) {
             console.error('Error rejecting video:', error);
-            setMessage('Error rejecting video');
+            toast.error('Error rejecting video');
         } finally {
             setRejecting(false)
             setTimeout(() => {
@@ -243,7 +243,6 @@ const ApproveVideo = () => {
                         </div>
                     </>
                     )}
-                    {message && <p className="bg-white text-[#ff0000] p-2 py-0 rounded shadow-md my-4 text-lg text-center">{message}</p>}
                 </div>
             </div>
         </section >

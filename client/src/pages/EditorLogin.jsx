@@ -1,12 +1,12 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 function EditorLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -17,13 +17,12 @@ function EditorLogin() {
     const response = await login(email, password);
     setLoading(false);
 
-    setMessage(response.message);
+    toast.info(response.message);
     if (response.status === 200) {
       navigate('/editor/dashboard');
     }
 
     setTimeout(() => {
-      setMessage('');
       setEmail('');
       setPassword('');
     }, 3000);
@@ -55,7 +54,6 @@ function EditorLogin() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
             </svg>
           </button>
-          {message && <p className="text-white my-2 text-center">{message}</p>}
           <div className="flex items-center flex-wrap mt-3">
             <Link to={'/editor/signup'} className='flex-1 my-3 underline hover:text-white text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Don&apos;t have an account?</Link>
             <Link to={'/editor/forgot-password'} className='flex-1 my-3 underline hover:text-white text-[#999999] transition-colors duration-200 ease-out text-center mx-auto block'>Forgot Password?</Link>

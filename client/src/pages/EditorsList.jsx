@@ -4,12 +4,11 @@ import axiosInstance from '../utils/AxiosInstance';
 import { Navigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import BackButton from '../components/BackButton';
+import { toast } from 'sonner';
 
 function EditorsList() {
     const { user, loading } = useContext(AuthContext);
     const [editors, setEditors] = useState([]);
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
     const [fetching, setFetching] = useState(false);
 
     const fetchEditors = async () => {
@@ -19,7 +18,7 @@ function EditorsList() {
             setEditors(response.data);
         } catch (error) {
             console.error('Error fetching channels editors:', error);
-            setError('Error fetching editors');
+            toast.error('Error fetching editors');
         } finally {
             setFetching(false);
         }
@@ -33,7 +32,6 @@ function EditorsList() {
         if (!user || user.role !== 'YouTuber') {
             return <Navigate to="/youtuber/login" />;
         } else {
-            console.log('user in EDitorList:', user)
             fetchEditors();
         }
     }, [user, loading]);
@@ -47,25 +45,18 @@ function EditorsList() {
             }
             );
             if (response.status === 200) {
-                setMessage('Editor removed successfully');
+                toast.success('Editor removed successfully');
                 fetchEditors();
             }
         } catch (error) {
             console.error('Error removing editor:', error);
-            setMessage('Failed to remove editor');
-        } finally {
-            setTimeout(() => {
-                setMessage('')
-            }, 3500)
+            toast.error('Failed to remove editor');
         }
     };
 
     return (
         <section className="my-8 container mx-auto px-2 md:px-0">
             <BackButton />
-            {error && <p className="bg-[#ff0000] p-4 py-2 rounded-lg shadow-md mb-4 text-white text-lg">{error}</p>}
-            {message && <p className="bg-[#ff0000] p-4 py-2 rounded-lg shadow-md mb-4 text-white text-lg">{message}</p>}
-
             <div className="bg-img rounded-3xl text-white py-4 px-2 md:px-6 drop-shadow-2xl mb-8">
                 <div className="flex flex-col items-center justify-center w-full gap-3">
                     <div className="font-lowballBold tracking-wider md:mb-2 flex flex-col gap-2">

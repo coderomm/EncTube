@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import axiosInstance from '../utils/AxiosInstance';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
-    const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleForgotPassword = async (e) => {
@@ -12,15 +12,14 @@ const ForgotPassword = () => {
         setLoading(true);
         try {
             const response = await axiosInstance.post('/editor/forgot-password', { email });
-            console.log('forgot pwd res:',response)
-            setMessage(response.data);
+            toast.success(response.data);
         } catch (error) {
             console.error('Error in sending reset mail')
+            toast.error('Error in sending reset mail')
         } finally {
             setLoading(false);
             setTimeout(() => {
                 setEmail('')
-                setMessage('')
             }, 3000)
         }
     };
@@ -44,7 +43,6 @@ const ForgotPassword = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                         </svg>
                     </button>
-                    {message && <p className="text-white my-2 text-center">{message}</p>}
                     <div className="flex flex-col md:flex-row items-center flex-wrap mt-3">
                         <Link to={'/editor/signup'} className='flex-1 md:my-3 underline text-[#999] hover:text-white transition-colors duration-200 ease-out text-center mx-auto block'>Don&apos;t have account?</Link>
                         <Link to={'/editor/login'} className='flex-1 md:my-3 underline text-[#999] hover:text-white transition-colors duration-200 ease-out text-center mx-auto block'>Already have an account?</Link>

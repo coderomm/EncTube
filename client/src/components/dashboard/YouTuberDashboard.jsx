@@ -3,6 +3,7 @@ import { AuthContext } from '../../context/AuthContext';
 import axiosInstance from '../../utils/AxiosInstance';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Loader from '../Loader';
+import { toast } from 'sonner';
 
 function YouTuberDashboard() {
   const { user, loading } = useContext(AuthContext);
@@ -19,11 +20,14 @@ function YouTuberDashboard() {
       setVideos(response.data);
     } catch (error) {
       console.error('Error fetching pending videos:', error);
+      toast.error('Error fetching pending videos');
       if (error.response && error.response.status === 403) {
         setError('Your account is no longer active.');
+        toast.error('Your account is no longer active.')
         AuthContext.logout();
       } else {
         setError('Error fetching pending videos');
+        toast.error('Error fetching pending videos')
       }
     } finally {
       setFetching(false);
