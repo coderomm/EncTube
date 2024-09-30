@@ -19,7 +19,7 @@ YouLayer is a platform that sits between the editor and the YouTuber, allowing e
 - **User-Friendly Interface**: A seamless experience for both editors and YouTubers.
 
 ### Tech Stack
-Built with React, Node.js, Express, MongoDB, and Tailwind CSS.
+Built with React, Node.js, Express, MongoDB, Tailwind CSS and Youtube Data API.
 
 ### Challenges
 One significant challenge encountered during development was the YouTube Data API quota limitation. The API currently allows for only 5-6 video uploads per day due to its 10,000 units daily limit. This constraint affects the scalability of the platform for larger use cases.

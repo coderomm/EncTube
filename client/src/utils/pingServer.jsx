@@ -6,7 +6,7 @@ const pingServer = () => {
     // const baseURL='http://localhost:5000/api/v1';
     const baseURL = 'https://api.youlayer.tech/api/v1';
 
-    axiosInstance.get(`${baseURL}/ping/healthcheck`)
+    axiosInstance.post(`${baseURL}/ping/healthcheck`)
         .then(response => {
             console.log('Ping successful:', response.data.message);
         })

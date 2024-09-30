@@ -29,9 +29,8 @@ const Contact = lazy(() => import('./pages/Contact'));
 const EditorsList = lazy(() => import('./pages/EditorsList'));
 
 function App() {
-  console.log(`${import.meta.env.VITE_APP_BACKEND_URL}`)
   useEffect(() => {
-    const interval = setInterval(pingServer, 5 * 60 * 1000);
+    const interval = setInterval(pingServer, 1 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
   return (
